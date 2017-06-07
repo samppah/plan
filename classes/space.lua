@@ -52,7 +52,7 @@ function Space:new(name, bpgon, boundaries)
         end
         --recreate shared boundaries table
         for i, v in pairs(boundaries) do
-            if v.isShared then
+            if v.hasTwin then
                 table.insert(self.sharedBoundaries, v.twin)
             end
         end
@@ -637,7 +637,7 @@ function Space:split(name)
     for i,b in ipairs(self.boundaries) do
         print("boundary #"..i)
         print("  isOuter: "..(b.isOuter and "true" or "-"))
-        print("  isShared: "..(b.isShared and "true" or "-"))
+        print("  hasTwin: "..(b.hasTwin and "true" or "-"))
         print("  twin.bi: "..(b.twin.bi or "-"))
         print("  twin.ssi: "..(b.twin.ssi or "-"))
         print("  twin.sbi: "..(b.twin.sbi or "-"))

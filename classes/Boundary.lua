@@ -36,7 +36,7 @@ function Boundary:new(point1, point2, parentSpace)
     --shared boundary info
     --boundary can be either: shared or outer
     self.isOuter = true --default
-    self.isShared = false --default
+    self.hasTwin = false --default
 
     self.twin = {}
     self.twin.bo = self
@@ -53,7 +53,7 @@ function Boundary:setShared(boundary)
     --as to self
 
     --set my data
-    self.isShared = true
+    self.hasTwin = true
     self.isOuter = false
 
     self.twin.bo = self
@@ -64,7 +64,7 @@ function Boundary:setShared(boundary)
     self.twin.ssi = boundary.parent:getMyIndex()
 
     --set twin data
-    boundary.isShared = true
+    boundary.hasTwin = true
     boundary.isOuter = false
 
     boundary.twin.bo = boundary
@@ -99,7 +99,7 @@ function Boundary:getData(mode)
     --table.insert(passableKeys, "guideMode")
     --table.insert(passableKeys, "guides")
     table.insert(passableKeys, "isOuter")
-    table.insert(passableKeys, "isShared")
+    table.insert(passableKeys, "hasTwin")
     table.insert(passableKeys, "twin")
     for i, v in pairs(passableKeys) do
         data[v] = self[v]
@@ -149,7 +149,7 @@ function Boundary:draw()
         --draw info
         --local infotxt = "#" .. index .. " " .. self:len() .. " " .. self:angle()
         local index = self:getMyIndex()
-        local infotxt = "#" .. index .. " " .. self:angle() .. "\n" .. "isShared = " .. (self.isShared and "true" or "false")
+        local infotxt = "#" .. index .. " " .. self:angle() .. "\n" .. "hasTwin = " .. (self.hasTwin and "true" or "false")
         
         love.graphics.print(stringFuncs.formatText(infotxt),unpack(self:center()))
     end
@@ -158,7 +158,7 @@ function Boundary:draw()
     --make share lines blink RED when space is selected,
     --show faded red otherwise
     local drawShareLines = false
-    if self.isShared then
+    if self.hasTwin then
         if self.parent.isSelected then
             if getBlinkStat() then
                 love.graphics.setColor(255,0,0)
