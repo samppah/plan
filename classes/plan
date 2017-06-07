@@ -1,0 +1,1334 @@
+let SessionLoad = 1
+if &cp | set nocp | endif
+let s:cpo_save=&cpo
+set cpo&vim
+imap <D-BS> 
+imap <M-BS> 
+imap <M-Down> }
+inoremap <D-Down> <C-End>
+imap <M-Up> {
+inoremap <D-Up> <C-Home>
+noremap! <M-Right> <C-Right>
+noremap! <D-Right> <End>
+noremap! <M-Left> <C-Left>
+noremap! <D-Left> <Home>
+inoremap <silent> <S-Tab> =BackwardsSnippet()
+inoremap <C-Tab> 	
+map! <S-Space> <BS>
+snoremap <silent> 	 i<Right>=TriggerSnippet()
+noremap <NL> gj
+noremap  gk
+snoremap  b<BS>
+noremap s :TCommentAs =&ft_
+noremap n :TCommentAs =&ft 
+noremap a :TCommentAs 
+noremap b :TCommentBlock
+vnoremap <silent> r :TCommentRight
+vnoremap <silent> i :TCommentInline
+nnoremap <silent> r :TCommentRight
+onoremap <silent> r :TCommentRight
+noremap   :TComment 
+noremap <silent> p m`vip:TComment``
+vnoremap <silent>  :TCommentMaybeInline
+nnoremap <silent>  :TComment
+onoremap <silent>  :TComment
+snoremap % b<BS>%
+snoremap ' b<BS>'
+noremap! ö 
+noremap! ä /
+noremap! å @
+noremap! Ä ]
+noremap! Ö [
+xmap S <Plug>VSurround
+snoremap U b<BS>U
+map Y y$
+vmap [% [%m'gv``
+snoremap \ b<BS>\
+noremap \_s :TCommentAs =&ft_
+noremap \_n :TCommentAs =&ft 
+noremap \_a :TCommentAs 
+noremap \_b :TCommentBlock
+xnoremap <silent> \_r :TCommentRight
+nnoremap <silent> \_r :TCommentRight
+snoremap <silent> \_r :TCommentRight
+onoremap <silent> \_r :TCommentRight
+xnoremap <silent> \_i :TCommentInline
+noremap \_  :TComment 
+noremap <silent> \_p vip:TComment
+xnoremap <silent> \__ :TCommentMaybeInline
+nnoremap <silent> \__ :TComment
+snoremap <silent> \__ :TComment
+onoremap <silent> \__ :TComment
+vmap ]% ]%m'gv``
+snoremap ^ b<BS>^
+snoremap ` b<BS>`
+vmap a% [%v]%
+map! € $
+nmap cs <Plug>Csurround
+nmap ds <Plug>Dsurround
+nmap gx <Plug>NetrwBrowseX
+xnoremap <silent> gC :TCommentMaybeInline
+nnoremap <silent> gCc :let w:tcommentPos = getpos(".") | set opfunc=tcomment#OperatorLineAnywayg@$
+nnoremap <silent> gC :let w:tcommentPos = getpos(".") | set opfunc=tcomment#OperatorAnywayg@
+xnoremap <silent> gc :TCommentMaybeInline
+nnoremap <silent> gcc :let w:tcommentPos = getpos(".") | set opfunc=tcomment#OperatorLineg@$
+nnoremap <silent> gc :let w:tcommentPos = getpos(".") | set opfunc=tcomment#Operatorg@
+xmap gS <Plug>VgSurround
+noremap gy oendO
+xmap s <Plug>Vsurround
+nmap ySS <Plug>YSsurround
+nmap ySs <Plug>YSsurround
+nmap yss <Plug>Yssurround
+nmap yS <Plug>YSurround
+nmap ys <Plug>Ysurround
+map <M-Down> }
+noremap <D-Down> <C-End>
+map <M-Up> {
+noremap <D-Up> <C-Home>
+noremap <M-Right> <C-Right>
+noremap <D-Right> <End>
+noremap <M-Left> <C-Left>
+noremap <D-Left> <Home>
+snoremap <Left> bi
+snoremap <Right> a
+snoremap <BS> b<BS>
+snoremap <silent> <S-Tab> i<Right>=BackwardsSnippet()
+nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
+map <F2> :g/if\>\(.*\)[^=><~][=]\{1,1}[^=]/s/\([^=><~]\)\([=]\{1,1}\)\([^=]\)/\1==\3/g
+xmap <BS> "-d
+imap S <Plug>ISurround
+imap s <Plug>Isurround
+inoremap <silent> 	 =TriggerSnippet()
+imap  <Plug>SuperTabForward
+imap  <Plug>SuperTabBackward
+inoremap <silent> 	 =ShowAvailableSnips()
+imap  <Plug>Isurround
+inoremap s :TCommentAs =&ft_
+inoremap n :TCommentAs =&ft 
+inoremap a :TCommentAs 
+inoremap b :TCommentBlock
+inoremap <silent> r :TCommentRight
+inoremap   :TComment 
+inoremap <silent> p :norm! m`vip:TComment``
+inoremap <silent>  :TComment
+nmap Ò `O
+nmap ò `o
+nmap Ó ´O
+nmap ó ´o
+nmap Ì `I
+nmap ì `i
+nmap Í ´I
+nmap í ´i
+nmap Ù `U
+nmap ù `u
+nmap Ú ´U
+nmap ú ´u
+nmap Ý ´Y
+nmap ý ´y
+nmap È `E
+nmap è `e
+nmap É ´E
+nmap é ´e
+nmap À `A
+nmap à `a
+nmap Á ´A
+nmap á ´a
+vnoremap ö 
+nnoremap ö 
+onoremap ö 
+vnoremap ä /
+nnoremap ä /
+onoremap ä /
+vnoremap å @
+nnoremap å @
+onoremap å @
+vnoremap Ä ]
+nnoremap Ä ]
+onoremap Ä ]
+vnoremap Ö [
+nnoremap Ö [
+onoremap Ö [
+vnoremap € $
+nmap € $
+omap € $
+iabbr gui GUI
+iabbr loacl local
+iabbr laocl local
+iabbr lcoal local
+iabbr lacol local
+iabbr lcaol local
+iabbr functoin function
+iabbr sabu sample_buffer
+iabbr seli selected_line
+iabbr sese selected_sequence
+iabbr sein selected_instrument
+iabbr setr selected_track
+iabbr sepa selected_pattern
+iabbr sesa selected_sample
+iabbr rewi renoise.app().window
+iabbr reap renoise.app()
+iabbr reto renoise.tool()
+iabbr retr renoise.song().transport
+iabbr rese renoise.song().sequencer
+iabbr reso renoise.song()
+let &cpo=s:cpo_save
+unlet s:cpo_save
+set autoindent
+set background=dark
+set backspace=indent,eol,start
+set expandtab
+set fileencodings=ucs-bom,utf-8,default,latin1
+set guicursor=r-cr:hor80-Cursor/lCursor
+set guitablabel=%M%t
+set helplang=fi
+set hlsearch
+set ignorecase
+set iminsert=1
+set incsearch
+set langmenu=none
+set mouse=a
+set printexpr=system('open\ -a\ Preview\ '.v:fname_in)\ +\ v:shell_error
+set ruler
+set rulerformat=%30(%=:b%n%y%m%r%w\ %l,%c%V\ %P%)
+set scrolloff=15
+set shiftwidth=4
+set showcmd
+set smartcase
+set smarttab
+set termencoding=utf-8
+set undodir=~/.vim/undo_files
+set virtualedit=block
+let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
+let v:this_session=expand("<sfile>:p")
+silent only
+cd ~/Documents/PROJEKTIT/TIETOKONE\ JA\ OHJELMOINTI/LÖVE/plan/classes
+if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
+  let s:wipebuf = bufnr('%')
+endif
+set shortmess=aoO
+badd +34 ~/Documents/PROJEKTIT/TIETOKONE\ JA\ OHJELMOINTI/LÖVE/plan/main.lua
+badd +28 ~/Documents/PROJEKTIT/TIETOKONE\ JA\ OHJELMOINTI/LÖVE/plan/sp
+badd +26 ~/Documents/PROJEKTIT/TIETOKONE\ JA\ OHJELMOINTI/LÖVE/plan/libraries/classic.lua
+badd +0 v
+badd +0 space.lua
+badd +92 Boundary.lua
+badd +15 point.lua
+badd +6 room.lua
+badd +24 console.lua
+badd +22 cursor.lua
+badd +0 ~/Documents/PROJEKTIT/TIETOKONE\ JA\ OHJELMOINTI/LÖVE/plan/guideline.lua
+args Boundary.lua
+edit ~/Documents/PROJEKTIT/TIETOKONE\ JA\ OHJELMOINTI/LÖVE/plan/main.lua
+set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe 'vert 1resize ' . ((&columns * 31 + 99) / 198)
+exe 'vert 2resize ' . ((&columns * 166 + 99) / 198)
+argglobal
+enew
+file NERD_tree_1
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=hide
+setlocal nobuflisted
+setlocal buftype=nofile
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'nerdtree'
+setlocal filetype=nerdtree
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+setlocal foldmethod=manual
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=1
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal nomacmeta
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+set number
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=%{exists('b:NERDTreeRoot')?b:NERDTreeRoot.path.str():''}
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'nerdtree'
+setlocal syntax=nerdtree
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal winfixwidth
+setlocal nowrap
+setlocal wrapmargin=0
+wincmd w
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=:--
+setlocal commentstring=--%s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'lua'
+setlocal filetype=lua
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=1
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=GetLuaIndent()
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e,0=end,0=until
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal nomacmeta
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+set number
+setlocal number
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=.lua
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'lua'
+setlocal syntax=lua
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+3
+normal zo
+10
+normal zo
+19
+normal zo
+19
+normal zo
+19
+normal zo
+19
+normal zo
+19
+normal zo
+25
+normal zo
+25
+normal zo
+25
+normal zo
+25
+normal zo
+25
+normal zo
+10
+normal zo
+36
+normal zo
+36
+normal zo
+36
+normal zo
+50
+normal zo
+51
+normal zo
+50
+normal zo
+59
+normal zo
+69
+normal zo
+70
+normal zo
+71
+normal zo
+70
+normal zo
+69
+normal zo
+81
+normal zo
+84
+normal zo
+87
+normal zo
+89
+normal zo
+92
+normal zo
+94
+normal zo
+89
+normal zo
+84
+normal zo
+93
+normal zo
+96
+normal zo
+98
+normal zo
+99
+normal zo
+106
+normal zo
+108
+normal zo
+106
+normal zo
+99
+normal zo
+113
+normal zo
+123
+normal zo
+124
+normal zo
+123
+normal zo
+127
+normal zo
+113
+normal zo
+98
+normal zo
+96
+normal zo
+133
+normal zo
+136
+normal zo
+137
+normal zo
+136
+normal zo
+133
+normal zo
+146
+normal zo
+147
+normal zo
+149
+normal zo
+146
+normal zo
+155
+normal zo
+156
+normal zo
+162
+normal zo
+163
+normal zo
+162
+normal zo
+155
+normal zo
+168
+normal zo
+169
+normal zo
+168
+normal zo
+178
+normal zo
+179
+normal zo
+180
+normal zo
+182
+normal zo
+184
+normal zo
+180
+normal zo
+179
+normal zo
+178
+normal zo
+192
+normal zo
+193
+normal zo
+194
+normal zo
+196
+normal zo
+198
+normal zo
+194
+normal zo
+193
+normal zo
+192
+normal zo
+207
+normal zo
+208
+normal zo
+212
+normal zo
+213
+normal zo
+215
+normal zo
+217
+normal zo
+213
+normal zo
+212
+normal zo
+207
+normal zo
+225
+normal zo
+227
+normal zo
+228
+normal zo
+230
+normal zo
+232
+normal zo
+228
+normal zo
+227
+normal zo
+225
+normal zo
+240
+normal zo
+242
+normal zo
+243
+normal zo
+242
+normal zo
+240
+normal zo
+249
+normal zo
+250
+normal zo
+252
+normal zo
+249
+normal zo
+256
+normal zo
+257
+normal zo
+259
+normal zo
+256
+normal zo
+284
+normal zo
+290
+normal zo
+284
+normal zo
+295
+normal zo
+300
+normal zo
+let s:l = 124 - ((24 * winheight(0) + 35) / 71)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+124
+normal! 058l
+wincmd w
+2wincmd w
+exe 'vert 1resize ' . ((&columns * 31 + 99) / 198)
+exe 'vert 2resize ' . ((&columns * 166 + 99) / 198)
+tabedit Boundary.lua
+set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe 'vert 1resize ' . ((&columns * 99 + 99) / 198)
+exe 'vert 2resize ' . ((&columns * 98 + 99) / 198)
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=:--
+setlocal commentstring=--%s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'lua'
+setlocal filetype=lua
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=1
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=GetLuaIndent()
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e,0=end,0=until
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal nomacmeta
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+set number
+setlocal number
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=.lua
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'lua'
+setlocal syntax=lua
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+10
+normal zo
+24
+normal zo
+26
+normal zo
+28
+normal zo
+33
+normal zo
+38
+normal zo
+24
+normal zo
+44
+normal zo
+52
+normal zo
+57
+normal zo
+66
+normal zo
+84
+normal zo
+85
+normal zo
+87
+normal zo
+90
+normal zo
+84
+normal zo
+let s:l = 92 - ((50 * winheight(0) + 35) / 71)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+92
+normal! 0
+wincmd w
+argglobal
+edit space.lua
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=:--
+setlocal commentstring=--%s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'lua'
+setlocal filetype=lua
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=1
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=GetLuaIndent()
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e,0=end,0=until
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal nomacmeta
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+set number
+setlocal number
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=.lua
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'lua'
+setlocal syntax=lua
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+8
+normal zo
+26
+normal zo
+28
+normal zo
+33
+normal zo
+36
+normal zo
+28
+normal zo
+26
+normal zo
+8
+normal zo
+51
+normal zo
+55
+normal zo
+51
+normal zo
+62
+normal zo
+64
+normal zo
+69
+normal zo
+71
+normal zo
+73
+normal zo
+69
+normal zo
+80
+normal zo
+86
+normal zo
+62
+normal zo
+91
+normal zo
+98
+normal zo
+105
+normal zo
+109
+normal zo
+130
+normal zo
+109
+normal zo
+105
+normal zo
+139
+normal zo
+145
+normal zo
+147
+normal zo
+145
+normal zo
+157
+normal zo
+161
+normal zo
+162
+normal zo
+163
+normal zo
+164
+normal zo
+163
+normal zo
+162
+normal zo
+161
+normal zo
+157
+normal zo
+171
+normal zo
+174
+normal zo
+176
+normal zo
+174
+normal zo
+171
+normal zo
+let s:l = 177 - ((58 * winheight(0) + 35) / 71)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+177
+normal! 019l
+wincmd w
+2wincmd w
+exe 'vert 1resize ' . ((&columns * 99 + 99) / 198)
+exe 'vert 2resize ' . ((&columns * 98 + 99) / 198)
+tabedit cursor.lua
+set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
+wincmd w
+set nosplitbelow
+set nosplitright
+wincmd t
+set winheight=1 winwidth=1
+exe 'vert 1resize ' . ((&columns * 76 + 99) / 198)
+exe 'vert 2resize ' . ((&columns * 121 + 99) / 198)
+argglobal
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=:--
+setlocal commentstring=--%s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'lua'
+setlocal filetype=lua
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=1
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=GetLuaIndent()
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e,0=end,0=until
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal nomacmeta
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+set number
+setlocal number
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=.lua
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'lua'
+setlocal syntax=lua
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+4
+normal zo
+9
+normal zo
+17
+normal zo
+19
+normal zo
+17
+normal zo
+9
+normal zo
+30
+normal zo
+let s:l = 11 - ((10 * winheight(0) + 35) / 71)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+11
+normal! 0
+wincmd w
+argglobal
+edit console.lua
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal balloonexpr=
+setlocal nobinary
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=:--
+setlocal commentstring=--%s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal expandtab
+if &filetype != 'lua'
+setlocal filetype=lua
+endif
+setlocal foldcolumn=0
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+setlocal foldlevel=0
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=indent
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=1
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=GetLuaIndent()
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e,0=end,0=until
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal nomacmeta
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=octal,hex
+set number
+setlocal number
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=.lua
+setlocal swapfile
+setlocal synmaxcol=3000
+if &syntax != 'lua'
+setlocal syntax=lua
+endif
+setlocal tabstop=8
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal noundofile
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+11
+normal zo
+22
+normal zo
+23
+normal zo
+27
+normal zo
+22
+normal zo
+45
+normal zo
+49
+normal zo
+let s:l = 12 - ((11 * winheight(0) + 35) / 71)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+12
+normal! 017l
+wincmd w
+2wincmd w
+exe 'vert 1resize ' . ((&columns * 76 + 99) / 198)
+exe 'vert 2resize ' . ((&columns * 121 + 99) / 198)
+tabnext 1
+if exists('s:wipebuf')
+  silent exe 'bwipe ' . s:wipebuf
+endif
+unlet! s:wipebuf
+set winheight=1 winwidth=20 shortmess=filnxtToO
+let s:sx = expand("<sfile>:p:r")."x.vim"
+if file_readable(s:sx)
+  exe "source " . fnameescape(s:sx)
+endif
+let &so = s:so_save | let &siso = s:siso_save
+doautoall SessionLoadPost
+unlet SessionLoad
+" vim: set ft=vim :
