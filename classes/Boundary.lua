@@ -81,6 +81,7 @@ end
 
 function Boundary:setAsTwins(boundary)
     --sets "boundary" as a shared ("twin") boundary
+    --only alters data
     --as to self
 
     --set my data
@@ -106,6 +107,12 @@ function Boundary:setAsTwins(boundary)
     boundary.twin.ssi = self.parent:getMyIndex()
 end
 
+function Boundary:createTwin()
+    --returns a new twin boundary for self
+    local twin = Boundary(self.p2.x, self.p2.y, self.p1.x, self.p1.y)
+    self:setAsTwins(twin)
+    return twin
+end
 function Boundary:getData(mode)
     --returns a table for passable boundary data
     --mode: "keys" / "data"
