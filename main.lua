@@ -550,26 +550,7 @@ function addKeyMapping(key, uiFunction, description)
     keys.mappingInfo[#keys.mappingInfo].description = description
 end
 
---[[
-keys.d = keyEvents.spaceDebugToggle 
-keys.e = keyEvents.dummy
-keys.space = keyEvents.mainConsoleToggle
-keys.i = keyEvents.showInfo
-keys.down = keyEvents.setBoundarySelectionMode
-keys.up = keyEvents.setSpaceSelectionMode
-keys.right = keyEvents.selectNext
-keys.left = keyEvents.selectPrevious
-keys.s = keyEvents.split
-keys.h = keyEvents.moveGuideLeft
-keys.l = keyEvents.moveGuideRight
-keys.j = keyEvents.moveGuideDown
-keys.k = keyEvents.moveGuideUp
-keys.n = keyEvents.rotateGuideCCWToggle
-keys.m = keyEvents.rotateGuideCWToggle
-keys.g = keyEvents.toggleBoundaryGuideMode
-keys.escape = keyEvents.quit
-keys.q = keyEvents.quit
---]]
+
 addKeyMapping("d", keyEvents.spaceDebugToggle, "spaceDebugToggle")
 addKeyMapping("e", keyEvents.dummy, "dummy")
 addKeyMapping("space", keyEvents.mainConsoleToggle, "mainConsoleToggle")
