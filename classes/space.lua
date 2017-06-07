@@ -499,39 +499,41 @@ function Space:split(name)
 
     --create new self bpgon
     local s1Bpgon = {} 
-    local s1Points = {}
+    local s1PointsS = {}
+    local s1PointsE = {}
     local s1Boundaries = {} --we create new boundaries as we go
 
 
     --first boundary starts at sgo (guide point)
     table.insert(s1Bpgon, sgo.point.x)
     table.insert(s1Bpgon, sgo.point.y)
-    s1Points[1] = Point(sgo.point.x, sgo.point.y)
+    s1PointsS[1] = Point(sgo.point.x, sgo.point.y)
 
     --next point is the hpx, hpy
     table.insert(s1Bpgon, hpx)
     table.insert(s1Bpgon, hpy)
-    s1Points[2] = Point(hpx, hpy)
+    s1PointsE[1] = Point(hpx, hpy)
 
     --create first boundary between those
-    local s1b1 = Boundary(s1Points[1],s1Points[2], self)
+    local s1b1 = Boundary(s1PointsS[1],s1PointsE[1], self)
     --this is new so no inherited data
     --put in boundary reconstruction table
     table.insert(s1Boundaries, s1b1)
     
 
     --from there, do endpoints of boundaries until at sbo
-    local ptI = 2
+    local ptI = 1
     local tailBoundaries = {}
     for i, b in bIter(self.boundaries, hb, sb) do
         table.insert(s1Bpgon, b.p2.x)
         table.insert(s1Bpgon, b.p2.y)
 
-        ptI = ptI + 1 --start from point 3
-        s1Points[ptI] = Point(b.p2.x, b.p2.y)
+        ptI = ptI + 1 --start from pointset 2
+        s1PointsS[ptI] = Point(s1PointsE[ptI-1].x, s1PointsE[ptI-1].y)
+        s1PointsE[ptI] = Point(b.p2.x, b.p2.y)
         
         --create nth boundary between prev and this
-        tailBoundaries[i] = Boundary(s1Points[ptI-1], s1Points[ptI], self)
+        tailBoundaries[i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
         --this inherits original boundary data
         b:setData(tailBoundaries[i])
         --put boundary in reconstruction table
@@ -539,7 +541,9 @@ function Space:split(name)
     end
 
     --and create last, closing boundary
-    local s1b3 = Boundary(s1Points[ptI],s1Points[1],self)
+    local beforelastpoint = Point(s1PointsE[ptI].x, s1PointsE[ptI].y)
+    local lastpoint = Point(s1PointsS[1].x, s1PointsS[1].y)
+    local s1b3 = Boundary(beforelastpoint,lastpoint,self)
     --this inherits the data of sb
     sbo:setData(s1b3)
     --put boundary in reconstruction table
@@ -553,23 +557,24 @@ function Space:split(name)
 
     --create new space bpgon
     local s2Bpgon = {}
-    local s2Points = {}
+    local s2PointsS = {}
+    local s2PointsE = {}
     local s2Boundaries = {}
 
 
     --first boundary startpoint is the hpx, hpy
     table.insert(s2Bpgon, hpx)
     table.insert(s2Bpgon, hpy)
-    s2Points[1] = Point(hpx,hpy)
+    s2PointsS[1] = Point(hpx,hpy)
 
 
     --second point is the guide point
     table.insert(s2Bpgon, sgo.point.x)
     table.insert(s2Bpgon, sgo.point.y)
-    s2Points[2] = Point(sgo.point.x, sgo.point.y)
+    s2PointsE[1] = Point(sgo.point.x, sgo.point.y)
 
 
-    local s2b1 = Boundary(s2Points[1],s2Points[2], nil) --notice we're setting the parent as nil because the space is not yet created! remember to set these after said move. (this is done in space:new)
+    local s2b1 = Boundary(s2PointsS[1],s2PointsE[1], nil) --notice we're setting the parent as nil because the space is not yet created! remember to set these after said move. (this is done in space:new)
     --all new boundary, no inherited data
 
     --put in boundary construction table 
@@ -578,26 +583,29 @@ function Space:split(name)
 
     --from there, do endpoints of boundaries until at hbo
     --until hb
-    local ptI = 2
+    local ptI = 1
     local tailBoundaries2 = {}
     for i, b in bIter(self.boundaries, sb, hb) do
         table.insert(s2Bpgon, b.p2.x)
         table.insert(s2Bpgon, b.p2.y)
 
-        ptI = ptI + 1 --start from point 3
-        s2Points[ptI] = Point(b.p2.x, b.p2.y)
+        ptI = ptI + 1 --start from pointset 2
+        s2PointsS[ptI] = Point(s2PointsE[ptI-1].x, s2PointsE[ptI-1].y)
+        s2PointsE[ptI] = Point(b.p2.x, b.p2.y)
 
         --create nth boundary between prev and this
-        tailBoundaries2[i] = Boundary(s2Points[ptI-1],s2Points[ptI],nil)
+        tailBoundaries2[i] = Boundary(s2PointsS[ptI],s2PointsE[ptI],nil)
         --this inherits original boundary data
         b:setData(tailBoundaries2[i])
         --put in boundary reconstruction table
         table.insert(s2Boundaries, tailBoundaries2[i])
 
     end
+    local beforelastpoint = Point(s2PointsE[ptI].x, s2PointsE[ptI].y)
+    local lastpoint = Point(s2PointsS[1].x, s2PointsS[1].y)
 
     --and create last, closing boundary
-    local s2b3 = Boundary(s2Points[ptI],s2Points[1],nil)
+    local s2b3 = Boundary(beforelastpoint, lastpoint,nil)
     --this inherits the data of hb
     hbo:setData(s2b3)
     --put in boundary reconstruction table
