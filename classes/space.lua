@@ -387,72 +387,9 @@ function Space:split(name)
         return
     end
 
+
     --calculate guide hitpoint with a boundary
     local hb, hbo, hpx, hpy = self:findGuideHitpoint(sgo)
-    --[[
-    --it is always pointing inwards. which is nice.
-
-    local hb = 0 --"hitBoundary", the index of boundary receiving a guideline hit in split
-    local hbo = nil -- hitBoundary object
-    local hpx = 0 --the hit point
-    local hpy = 0
-
-    for i,b in ipairs(self.boundaries) do
-        if i == sb then
-            --no test for selected boundary ("self")
-        else
-            con:add("testing boundary #"..i)
-            repeat --faux do loop to use breaks to escape this block
-                --if hit, set hb = i
-                
-                --guide line coordinates (IN SCREEN! TODO)
-                local glx1 = sgo.bPoint1.x
-                local gly1 = sgo.bPoint1.y
-                local glx2 = sgo.bPoint2.x
-                local gly2 = sgo.bPoint2.y
-
-                --test line coordinates
-                local tlx1 = b.p1.x
-                local tly1 = b.p1.y
-                local tlx2 = b.p2.x
-                local tly2 = b.p2.y
-
-                local doCross = pmath:checkIntersect(
-                    {x = glx1, y = gly1},
-                    {x = glx2, y = gly2},
-                    {x = tlx1, y = tly1},
-                    {x = tlx2, y = tly2})
-
-                if not doCross then
-                    break --exit faux do loop
-                end
-
-                --they cross! yeah baby!
-                hb = i
-                hbo = self.boundaries[hb]
-                
-                --find point of intersect (hpx, hpy)
-                hpx, hpy = pmath:findIntersect(
-                    glx1,gly1,glx2,gly2,
-                    tlx1,tly1,tlx2,tly2,
-                    true, true
-                    )
-
-            until true --end of faux do loop
-
-            if hb > 0 then
-                --guide hits boundary #hb at hpx, hpy
-
-                print("predicting hit on boundary #"..hb)
-                --leave for loop.
-                --the boundaries are in clockwise order so
-                --the right one should be the FIRST one that is
-                --intersected.
-                break
-            end
-        end
-    end
-    --]]
 
     if hb == 0 then
         print("No hb found!"..hb)
@@ -465,6 +402,41 @@ function Space:split(name)
         con:add("weird shit: checkIntersect >< findIntersect"..hpy)
         return
     end
+
+
+
+
+    --split neighbouring boundaries along split points
+    local newSplitNeighbourSb = nil --these are used after the spaces are created
+    local newSplitNeighbourHb = nil
+    for i, twin in pairs(self.twinBoundaries) do
+        if twin.bo == sbo or twin.bo == hbo then
+            --only twins of these two need splitting
+            local atLen = sgo.atLen
+            local atInvLen = hbo:len()-sgo.atLen
+            local newB = nil
+            if twin.bo == sbo then
+                newB = sbo:split(atLen) 
+                newSplitNeighbourSb = newB
+                con:add("sb")
+            else
+                newB = twin.sbo:split(atInvLen)
+                newSplitNeighbourHb = newB
+                con:add("hb")
+            end
+            local sso = twin.sso
+            --manage sso.boundaries
+            local ssobtl = #sso.boundaries
+            local sbi = twin.sbo:getMyIndex()
+            table.insert(sso.boundaries, normBIndex(ssobtl, sbi+1), newB)
+            --manage sso.bpgon
+            table.insert(sso.bpgon, normBIndex(ssobtl, sbi)*2+1, newB.p1.y)
+            table.insert(sso.bpgon, normBIndex(ssobtl, sbi)*2+1, newB.p1.x) --the same index, we push and slide
+            
+        end
+    end
+
+
 
     --CREATE BOUNDARIES FOR SPACES
     function normBIndex(btl, bi)
@@ -488,7 +460,7 @@ function Space:split(name)
         --an iterator function to loop over
         --boundaries tables ends to beginnings
         --
-        --end_ is not normalized
+        --end_ is not normalized (=possibly out of bounds)
         --
         local i = 0
         local len = #table
@@ -518,52 +490,6 @@ function Space:split(name)
 
         end
     end
-
-
-
-    --TODO:managing shared boundaries is a pain in the ass
-    --maybe there's something more intuitive than the
-    --"SharedBoundaries" -table (which should be updated ALL the time)
-
-    --I can't split boundaries, because the table is not reliable
-
-    --[[
-    --split neighbouring boundaries, if shared
-    local newSplitNeighbourSb = nil
-    local newSplitNeighbourHb = nil
-    for i, twin in pairs(self.twinBoundaries) do
-        local bi = twin.bi
-        local bo = twin.bo
-        local sbi = twin.sbi
-        local sbo = twin.sbo
-        local ssi = twin.ssi
-        local sso = twin.sso
-
-        local atLen = sgo.atLen
-        local atInvLen = hbo:len()-sgo.atLen
-
-        if bi == sb or bi == hb then
-            local newB = nil
-            if bi == sb then
-                --split boundary
-                newB = sbo:split(atLen)
-                newSplitNeighbourSb = newB
-            elseif twin.bi == hb then
-                --split
-                newB = twin.sbo:split(atInvLen)
-                newSplitNeighbourHb = newB
-            end
-            --push boundary in right spot at sso.boundaries
-            local ssobtl = #sso.boundaries
-            table.insert(sso.boundaries, normBIndex(ssobtl, sbi), newB)
-            --manage sso.bpgon
-            table.insert(sso.bpgon, (sbi)*2, newB.p1.y)
-            table.insert(sso.bpgon, (sbi)*2, newB.p1.x) --the same index, we push and slide
-        else
-            --don't split!
-        end
-    end
-    --]]
 
 
 
@@ -689,6 +615,7 @@ function Space:split(name)
     --create new space
     local s2 = Space(name, s2Bpgon, s2Boundaries)
 
+    --set twin info
     --new boundary is shared with self, new space
     local setSBI1=1
     local setSBI2=1
@@ -696,19 +623,17 @@ function Space:split(name)
     self:setAsTwinBoundaries(setSBI1, ssi, setSBI2) 
 
 
-    --[[
-    --set sharing information for new split neighbours
+    --set twin information for new split neighbours
     if newSplitNeighbourSb then
         --it's the same sharing info
+        local n = newSplitNeighboursb
+        self:setAsTwinBoundaries(#self.boundaries, n.parent:getMyIndex(), n:getMyIndex())
     end
 
     if newSplitNeighbourHb then
         local n = newSplitNeighbourHb
         s2:setAsTwinBoundaries(2, n.parent:getMyIndex(), n:getMyIndex())
     end
-    --]]
-
-
 
     --[[
     --debug space boundary data
@@ -730,6 +655,16 @@ function Space:getMyIndex()
     for i, s in ipairs(getObjectTree()) do
         if s == self then
             return i
+        end
+    end
+end
+
+function Space:getMyTwins()
+    --updates twinBoundaries info
+    self.twinBoundaries = {}
+    for i, b in pairs(self.boundaries) do
+        if b.hasTwin then
+            table.insert(self.twinBoundaries, b.twin)
         end
     end
 end
@@ -776,6 +711,9 @@ function Space:center()
     --every vertex to the vertex that is numVertices/2 away
     --from that point. Calculate midpoints of each line.
     --Get average of those points.
+    --
+    --gets distortion from vertex distribution
+    --TODO:replace with a better algorithm
     --
     local verts = {}
     for i = 1, #self.bpgon, 2 do

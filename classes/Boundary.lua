@@ -100,15 +100,16 @@ function Boundary:setAsTwins(boundary)
     boundary.isOuter = false
 
     boundary.twin.bo = boundary
-    boundary.twin.bi = self.twin.sbi
+    boundary.twin.bi = self.twin.sbo:getMyIndex()
     boundary.twin.sbo = self
-    boundary.twin.sbi = self.twin.bi
+    boundary.twin.sbi = self.twin.bo:getMyIndex()
     boundary.twin.sso = self.parent
     boundary.twin.ssi = self.parent:getMyIndex()
 end
 
 function Boundary:createTwin()
     --returns a new twin boundary for self
+    --this boundary does NOT have a parent space!
     local twin = Boundary(self.p2.x, self.p2.y, self.p1.x, self.p1.y)
     self:setAsTwins(twin)
     return twin
@@ -320,15 +321,15 @@ function Boundary:split(len)
         newPoint2 = Point(xe, ye)
     else
         local pal = self:pointAtLen(len)
-        local xal = pal[1]
-        local yal = pal[2]
+        local xm = pal[1]
+        local ym = pal[2]
         local xe = self.p2.x
         local ye = self.p2.y
         --this boundary will be x1,y1 -> xal,yal 
         --new boundary will be xal,yal -> xe,ye
-        self.p2.x = xal
-        self.p2.y = yal
-        newPoint1 = Point(xal, yal)
+        self.p2.x = xm
+        self.p2.y = ym
+        newPoint1 = Point(xm, ym)
         newPoint2 = Point(xe, ye)
     end
     local newBoundary = Boundary(newPoint1, newPoint2, self.parent)
