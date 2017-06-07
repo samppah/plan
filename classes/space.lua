@@ -53,7 +53,7 @@ function Space:new(name, bpgon, boundaries)
         --recreate shared boundaries table
         for i, v in pairs(boundaries) do
             if v.isShared then
-                table.insert(self.sharedBoundaries, v.sharedRef)
+                table.insert(self.sharedBoundaries, v.twin)
             end
         end
     end
@@ -79,7 +79,7 @@ function Space:shareBoundary(bi, ssi, sbi)
 
     bo:setShared(sbo)
 
-    table.insert(self.sharedBoundaries, self.boundaries[bi].sharedRef)
+    table.insert(self.sharedBoundaries, self.boundaries[bi].twin)
     con:add("Shared my boundary #"..bi.." with space #"..ssi.."'s boundary #"..sbi)
     
 end
@@ -453,13 +453,13 @@ function Space:split(name)
     --split neighbouring boundaries, if shared
     local newSplitNeighbourSb = nil
     local newSplitNeighbourHb = nil
-    for i, sharedRef in pairs(self.sharedBoundaries) do
-        local bi = sharedRef.bi
-        local bo = sharedRef.bo
-        local sbi = sharedRef.sbi
-        local sbo = sharedRef.sbo
-        local ssi = sharedRef.ssi
-        local sso = sharedRef.sso
+    for i, twin in pairs(self.sharedBoundaries) do
+        local bi = twin.bi
+        local bo = twin.bo
+        local sbi = twin.sbi
+        local sbo = twin.sbo
+        local ssi = twin.ssi
+        local sso = twin.sso
 
         local atLen = sgo.atLen
         local atInvLen = hbo:len()-sgo.atLen
@@ -470,9 +470,9 @@ function Space:split(name)
                 --split boundary
                 newB = sbo:split(atLen)
                 newSplitNeighbourSb = newB
-            elseif sharedRef.bi == hb then
+            elseif twin.bi == hb then
                 --split
-                newB = sharedRef.sbo:split(atInvLen)
+                newB = twin.sbo:split(atInvLen)
                 newSplitNeighbourHb = newB
             end
             --push boundary in right spot at sso.boundaries
@@ -638,9 +638,9 @@ function Space:split(name)
         print("boundary #"..i)
         print("  isOuter: "..(b.isOuter and "true" or "-"))
         print("  isShared: "..(b.isShared and "true" or "-"))
-        print("  sharedRef.bi: "..(b.sharedRef.bi or "-"))
-        print("  sharedRef.ssi: "..(b.sharedRef.ssi or "-"))
-        print("  sharedRef.sbi: "..(b.sharedRef.sbi or "-"))
+        print("  twin.bi: "..(b.twin.bi or "-"))
+        print("  twin.ssi: "..(b.twin.ssi or "-"))
+        print("  twin.sbi: "..(b.twin.sbi or "-"))
     end
     --]]
         

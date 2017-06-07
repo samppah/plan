@@ -38,13 +38,13 @@ function Boundary:new(point1, point2, parentSpace)
     self.isOuter = true --default
     self.isShared = false --default
 
-    self.sharedRef = {}
-    self.sharedRef.bo = self
-    self.sharedRef.bi = nil -- my index (boundary index in my parent space)
-    self.sharedRef.sbo = nil --shared boundary object
-    self.sharedRef.sbi = nil --shared boundary index
-    self.sharedRef.sso = nil --shared space object
-    self.sharedRef.ssi = nil --shared space index
+    self.twin = {}
+    self.twin.bo = self
+    self.twin.bi = nil -- my index (boundary index in my parent space)
+    self.twin.sbo = nil --shared boundary object
+    self.twin.sbi = nil --shared boundary index
+    self.twin.sso = nil --shared space object
+    self.twin.ssi = nil --shared space index
 end
 
 
@@ -56,23 +56,23 @@ function Boundary:setShared(boundary)
     self.isShared = true
     self.isOuter = false
 
-    self.sharedRef.bo = self
-    self.sharedRef.bi = self:getMyIndex()
-    self.sharedRef.sbo = boundary
-    self.sharedRef.sbi = boundary:getMyIndex()
-    self.sharedRef.sso = boundary.parent
-    self.sharedRef.ssi = boundary.parent:getMyIndex()
+    self.twin.bo = self
+    self.twin.bi = self:getMyIndex()
+    self.twin.sbo = boundary
+    self.twin.sbi = boundary:getMyIndex()
+    self.twin.sso = boundary.parent
+    self.twin.ssi = boundary.parent:getMyIndex()
 
     --set twin data
     boundary.isShared = true
     boundary.isOuter = false
 
-    boundary.sharedRef.bo = boundary
-    boundary.sharedRef.bi = self.sharedRef.sbi
-    boundary.sharedRef.sbo = self
-    boundary.sharedRef.sbo = self.sharedRef.bi
-    boundary.sharedRef.sso = self.parent
-    boundary.sharedRef.ssi = self.parent:getMyIndex()
+    boundary.twin.bo = boundary
+    boundary.twin.bi = self.twin.sbi
+    boundary.twin.sbo = self
+    boundary.twin.sbo = self.twin.bi
+    boundary.twin.sso = self.parent
+    boundary.twin.ssi = self.parent:getMyIndex()
 end
 
 function Boundary:getData(mode)
@@ -100,7 +100,7 @@ function Boundary:getData(mode)
     --table.insert(passableKeys, "guides")
     table.insert(passableKeys, "isOuter")
     table.insert(passableKeys, "isShared")
-    table.insert(passableKeys, "sharedRef")
+    table.insert(passableKeys, "twin")
     for i, v in pairs(passableKeys) do
         data[v] = self[v]
     end
