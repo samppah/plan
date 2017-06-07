@@ -161,7 +161,7 @@ function Space:addChild(name, bpgon)
 end
 
 function Space:chooseSplitBoundary()
-    --returns a candidate for splitting
+    --returns a candidate for splitting (index, object)
 
     local function rateByPrevalence()
         --collect the angles and rate by prevalence
@@ -261,167 +261,48 @@ function Space:chooseSplitBoundary()
 
     --find boundary with this angle and splittable and set sb
     --sb = selected boundary (index)
-    local sb = 1
+    local sb = 0
+    local sbo = nil
     for i, b in pairs(self.boundaries) do
         if b:angle() == selAngle then
             --is splittable?
             if #b.guides.normal > 0 then
                 sb = i
+                sbo = b
                 break
             end
         end
     end
 
-    return sb
+    return sb, sbo
 end
 
-function Space:split(name)
-    
-    --select a boundary to split
-
-    --[[
-    --collect the angles and rate by prevalence
-    local angles = self:getBoundaryAngles() --normalized to positive radians
-    local anglesRating = {}
-    for i, a in pairs(angles) do
-        --check if angle is listed
-        local isListedAt = 0
-        for ii, ra in ipairs(anglesRating) do
-            if ra.angle and ra.angle == a then
-                --angle is listed
-                isListedAt = ii
-                break
-            end
-        end
-        if isListedAt > 0 then
-            ar.rating = ar.rating + 1
-        else
-            --a new angle
-            ar = {}
-            ar.angle = a
-            ar.rating = 1
-            table.insert(anglesRating, ar) 
-        end
-    end
-
-    --rate up angles that are parallel OR 90deg away from any
-    --other angles
-    for i, a in ipairs(anglesRating) do
-
-        local function is90DegFrom(a1, a2)
-            if a1 == a2 then
-                --parallel
-                return true
-            end
-            --create comparison table
-            local amin = math.min(a1,a2)
-            local amax = math.max(a1,a2)
-            local at = {}
-            for i = 1, 3 do
-                at[i] = (at[i-1] or amin) + math.pi/2
-            end
-            --check for a match
-            local tolerance = 0.0000000001
-            local is90 = false
-            for i = 1,3 do
-                if math.abs(at[i]-amax) < tolerance then
-                    return true
-                end
-            end
-            return false
-        end
-
-        --check against all others
-        for ii, aa in ipairs(anglesRating) do
-            if ii == i then
-                --don't compare against yourself
-            else
-                if is90DegFrom(a.angle, aa.angle) then
-                    a.rating = a.rating + 1
-                end
-            end
-        end
-    end
-
-    --debug dump
-    print("Selecting boundary to split")
-    for i, v in ipairs(anglesRating) do
-        print("angle #"..i..": "..v.angle.." / score: "..v.rating)
-    end
-
-    --get highest results in a separate table
-    local highestRatedAngles = {}
-    --get highest score
-    local highScore = 0
-    for i, a in pairs(anglesRating) do
-        if a.rating > highScore then
-            highScore = a.rating
-        end
-    end
-    --collect angles with highScore
-    for i, a in pairs(anglesRating) do
-        if a.rating == highScore then
-            table.insert(highestRatedAngles, a.angle)
-        end
-    end
-
-    --randomly select one
-    local selIndex = math.ceil(math.random(#highestRatedAngles))
-    local selAngle = highestRatedAngles[selIndex]
-
-    --find boundary with this angle and splittable and set sb
-    local sb = 1
-    for i, b in pairs(self.boundaries) do
-        if b:angle() == selAngle then
-            --is splittable?
-            if #b.guides.normal > 0 then
-                sb = i
-                break
-            end
-        end
-    end
-    --]]
-
-    local sb = self:chooseSplitBoundary()
-
-
-    --debug
-    --print("selected boundary #"..sb..", index:"..selIndex.."/"..#highestRatedAngles)
-
-
-    for i, v in ipairs(self.boundaries) do
-        if v.isSelected then
-            sb = i
-            break
-        end
-    end
-    sbo = self.boundaries[sb] --the selected boundary object
-
-
+function Space:chooseSplitGuide(sbo)
+    --returns a guide (index) and the guide object
     --select a guide along sb to split along
     local sgtl = #sbo.guides.sortedForSplit
     print("sgtl: "..sgtl)
     local sg = math.ceil(sgtl/2) --the middle one
     print("sg: "..sg)
 
-    if sg == 0 then
-        --no guides to split along!
-        con:add("can't split space")
-        return
-    end
+    local sgo = sbo.guides.sortedForSplit[sg] --the selected guide object
+
+    return sg, sgo
+end
+
+
+function Space:findGuideHitpoint(sgo)
+    --returns boundary index and object of the boundary
+    --which gets hit by the guide object
+    --and the coordinates of the hit
+    --
+    --calculate guide hitpoint with a boundary
+    --it is always pointing inwards. which is nice.
 
     local hb = 0 --"hitBoundary", the index of boundary receiving a guideline hit in split
     local hbo = nil -- hitBoundary object
     local hpx = 0 --the hit point
     local hpy = 0
-
-    con:add("Space:split("..(name or "")..")")
-
-    sgo = sbo.guides.sortedForSplit[sg] --the selected guide object
-    sgo.isSelected = true
-    --print("sgo: "..sgo)
-    --calculate guide hitpoint with a boundary
-    --it is always pointing inwards. which is nice.
 
     for i,b in ipairs(self.boundaries) do
         if i == sb then
@@ -429,11 +310,7 @@ function Space:split(name)
         else
             con:add("testing boundary #"..i)
             repeat --faux do loop to use breaks to escape this block
-                --
-                --SUPER TESTING
-                --
                 --if hit, set hb = i
-                --
                 
                 --guide line coordinates (IN SCREEN! TODO)
                 local glx1 = sgo.bPoint1.x
@@ -447,13 +324,11 @@ function Space:split(name)
                 local tlx2 = b.p2.x
                 local tly2 = b.p2.y
 
-
                 local doCross = pmath:checkIntersect(
                     {x = glx1, y = gly1},
                     {x = glx2, y = gly2},
                     {x = tlx1, y = tly1},
                     {x = tlx2, y = tly2})
-
 
                 if not doCross then
                     break --exit faux do loop
@@ -469,15 +344,8 @@ function Space:split(name)
                     tlx1,tly1,tlx2,tly2,
                     true, true
                     )
-                print("x = glx1:"..glx1..", y = gly1:"..gly1)
-                print("x = glx2:"..glx2..", y = gly2:"..gly2)
-                print("x = tlx1:"..tlx1..", y = tly1:"..tly1)
-                print("x = tlx2:"..tlx2..", y = tly2:"..tly2)
-
-
 
             until true --end of faux do loop
-            
 
             if hb > 0 then
                 --guide hits boundary #hb at hpx, hpy
@@ -491,16 +359,110 @@ function Space:split(name)
             end
         end
     end
+    return hb, hbo, hpx, hpy
+end
+
+
+function Space:split(name)
+    --splits a space into two
+    --name is the name of the new space
+    
+    --select a boundary to split
+    --sb selected boundary (index), sbo = the boundary object
+    local sb, sbo = self:chooseSplitBoundary()
+
+    if sb == 0 then
+        --no boundaries suitable for splitting
+        con:add("can't split space")
+        return
+    end
+
+
+    --select a guide to split along
+    local sg, sgo = self:chooseSplitGuide(sbo)
+
+    if sg == 0 then
+        --no guides to split along!
+        con:add("can't split space")
+        return
+    end
+
+    --calculate guide hitpoint with a boundary
+    local hb, hbo, hpx, hpy = self:findGuideHitpoint(sgo)
+    --[[
+    --it is always pointing inwards. which is nice.
+
+    local hb = 0 --"hitBoundary", the index of boundary receiving a guideline hit in split
+    local hbo = nil -- hitBoundary object
+    local hpx = 0 --the hit point
+    local hpy = 0
+
+    for i,b in ipairs(self.boundaries) do
+        if i == sb then
+            --no test for selected boundary ("self")
+        else
+            con:add("testing boundary #"..i)
+            repeat --faux do loop to use breaks to escape this block
+                --if hit, set hb = i
+                
+                --guide line coordinates (IN SCREEN! TODO)
+                local glx1 = sgo.bPoint1.x
+                local gly1 = sgo.bPoint1.y
+                local glx2 = sgo.bPoint2.x
+                local gly2 = sgo.bPoint2.y
+
+                --test line coordinates
+                local tlx1 = b.p1.x
+                local tly1 = b.p1.y
+                local tlx2 = b.p2.x
+                local tly2 = b.p2.y
+
+                local doCross = pmath:checkIntersect(
+                    {x = glx1, y = gly1},
+                    {x = glx2, y = gly2},
+                    {x = tlx1, y = tly1},
+                    {x = tlx2, y = tly2})
+
+                if not doCross then
+                    break --exit faux do loop
+                end
+
+                --they cross! yeah baby!
+                hb = i
+                hbo = self.boundaries[hb]
+                
+                --find point of intersect (hpx, hpy)
+                hpx, hpy = pmath:findIntersect(
+                    glx1,gly1,glx2,gly2,
+                    tlx1,tly1,tlx2,tly2,
+                    true, true
+                    )
+
+            until true --end of faux do loop
+
+            if hb > 0 then
+                --guide hits boundary #hb at hpx, hpy
+
+                print("predicting hit on boundary #"..hb)
+                --leave for loop.
+                --the boundaries are in clockwise order so
+                --the right one should be the FIRST one that is
+                --intersected.
+                break
+            end
+        end
+    end
+    --]]
 
     if hb == 0 then
         print("No hb found!"..hb)
-        con:add("Could not find hb")
+        con:add("Weird shit: Could not find hb")
         return
     end
     if hpx == false then
         --a hit predicted but no hit point registered
         --some tolerance issues with pmath:findIntersect did this
-        con:add("weird shit happenin, boss:"..hpy)
+        con:add("weird shit: checkIntersect >< findIntersect"..hpy)
         return
     end
 
