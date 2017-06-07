@@ -69,7 +69,7 @@ function Space:update(bpgon, boundaries)
     self.boundaries = boundaries
 end
 
-function Space:shareBoundary(bi, ssi, sbi)
+function Space:setAsTwinBoundaries(bi, ssi, sbi)
     --bi = index of boundary to share in this space
     --ssi = index of parent space of shared boundary
     --sbi = index of boundary of the adjacent space to share
@@ -615,7 +615,7 @@ function Space:split(name)
     local setSBI1=1
     local setSBI2=1
     local ssi = #getObjectTree() --the new space index, latest one created
-    self:shareBoundary(setSBI1, ssi, setSBI2) 
+    self:setAsTwinBoundaries(setSBI1, ssi, setSBI2) 
 
 
     --[[
@@ -626,7 +626,7 @@ function Space:split(name)
 
     if newSplitNeighbourHb then
         local n = newSplitNeighbourHb
-        s2:shareBoundary(2, n.parent:getMyIndex(), n:getMyIndex())
+        s2:setAsTwinBoundaries(2, n.parent:getMyIndex(), n:getMyIndex())
     end
     --]]
 
