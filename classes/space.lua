@@ -160,10 +160,126 @@ function Space:addChild(name, bpgon)
     return spaceObject
 end
 
+function Space:chooseSplitBoundary()
+    --returns a candidate for splitting
+
+    local function rateByPrevalence()
+        --collect the angles and rate by prevalence
+        local angles = self:getBoundaryAngles() --normalized to positive radians
+        local ratedAngles = {}
+        for i, a in pairs(angles) do
+            --check if angle is listed
+            local isListedAt = 0
+            for ii, ra in ipairs(ratedAngles) do
+                if ra.angle and ra.angle == a then
+                    --angle is listed
+                    isListedAt = ii
+                    break
+                end
+            end
+            if isListedAt > 0 then
+                ar.rating = ar.rating + 1
+            else
+                --a new angle
+                ar = {}
+                ar.angle = a
+                ar.rating = 1
+                table.insert(ratedAngles, ar) 
+            end
+        end
+
+        return ratedAngles
+    end
+
+    local function rateBy90Deg(ratedAngles)
+        --rate up angles that are parallel OR 90deg away from any
+        --other angles
+        for i, a in ipairs(ratedAngles) do
+
+            local function is90DegFrom(a1, a2)
+                if a1 == a2 then
+                    --parallel
+                    return true
+                end
+                --create comparison table
+                local amin = math.min(a1,a2)
+                local amax = math.max(a1,a2)
+                local at = {}
+                for i = 1, 3 do
+                    at[i] = (at[i-1] or amin) + math.pi/2
+                end
+                --check for a match
+                local tolerance = 0.0000000001
+                local is90 = false
+                for i = 1,3 do
+                    if math.abs(at[i]-amax) < tolerance then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            --check against all others
+            for ii, aa in ipairs(ratedAngles) do
+                if ii == i then
+                    --don't compare against yourself
+                else
+                    if is90DegFrom(a.angle, aa.angle) then
+                        a.rating = a.rating + 1
+                    end
+                end
+            end
+        end
+
+        return ratedAngles
+
+    end
+
+    --rate angles of boundaries
+    local ratedAngles = rateByPrevalence()
+    ratedAngles = rateBy90Deg(ratedAngles)
+
+    --get highest results in a separate table
+    local highestRatedAngles = {}
+    --get highest score
+    local highScore = 0
+    for i, a in pairs(ratedAngles) do
+        if a.rating > highScore then
+            highScore = a.rating
+        end
+    end
+    --collect angles with highScore
+    for i, a in pairs(ratedAngles) do
+        if a.rating == highScore then
+            table.insert(highestRatedAngles, a.angle)
+        end
+    end
+
+    --randomly select one
+    local selIndex = math.ceil(math.random(#highestRatedAngles))
+    local selAngle = highestRatedAngles[selIndex]
+
+    --find boundary with this angle and splittable and set sb
+    --sb = selected boundary (index)
+    local sb = 1
+    for i, b in pairs(self.boundaries) do
+        if b:angle() == selAngle then
+            --is splittable?
+            if #b.guides.normal > 0 then
+                sb = i
+                break
+            end
+        end
+    end
+
+    return sb
+end
+
 function Space:split(name)
     
     --select a boundary to split
 
+    --[[
     --collect the angles and rate by prevalence
     local angles = self:getBoundaryAngles() --normalized to positive radians
     local anglesRating = {}
@@ -227,13 +343,11 @@ function Space:split(name)
         end
     end
 
-    --[[
     --debug dump
     print("Selecting boundary to split")
     for i, v in ipairs(anglesRating) do
         print("angle #"..i..": "..v.angle.." / score: "..v.rating)
     end
-    --]]
 
     --get highest results in a separate table
     local highestRatedAngles = {}
@@ -266,8 +380,10 @@ function Space:split(name)
             end
         end
     end
-    --set oldSb to use with sharing setting
-    oldSb = sb
+    --]]
+
+    local sb = self:chooseSplitBoundary()
+
 
     --debug
     --print("selected boundary #"..sb..", index:"..selIndex.."/"..#highestRatedAngles)
