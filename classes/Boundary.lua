@@ -47,6 +47,37 @@ function Boundary:new(point1, point2, parentSpace)
     self.twin.ssi = nil --shared space index
 end
 
+function Boundary:validateTwin(boundary)
+    --a twin boundary has same endpoints but in reverse order
+    local sp1x = self.p1.x
+    local sp1y = self.p1.y
+    local ep1x = self.p2.x
+    local ep1y = self.p2.y
+
+    local sp2x = self.p2.x
+    local sp2y = self.p2.y
+    local ep2x = self.p2.x
+    local ep2y = self.p2.y
+
+    local sp = math.abs(sp1x - ep2x) < EPS and math.abs(sp1y - ep2y) < EPS
+    local ep = math.abs(ep1x - sp2x) < EPS and math.abs(ep1y - sp2y) < EPS
+
+    return (sp and ep)
+end
+
+function Boundary:isMyTwin(boundary)
+    --returns true if boundary is a twin of self
+    local validated = self:validateTwin(boundary)
+    if validated then
+        if self.twin.bo == boundary then
+            return true
+        else
+            return false
+        end
+    else
+        return false
+    end
+end
 
 function Boundary:setAsTwins(boundary)
     --sets "boundary" as a shared ("twin") boundary
@@ -70,7 +101,7 @@ function Boundary:setAsTwins(boundary)
     boundary.twin.bo = boundary
     boundary.twin.bi = self.twin.sbi
     boundary.twin.sbo = self
-    boundary.twin.sbo = self.twin.bi
+    boundary.twin.sbi = self.twin.bi
     boundary.twin.sso = self.parent
     boundary.twin.ssi = self.parent:getMyIndex()
 end
