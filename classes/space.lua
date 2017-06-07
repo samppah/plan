@@ -32,7 +32,7 @@ function Space:new(name, bpgon, boundaries)
     self.isSelected = false
     self.debug = false
 
-    self.sharedBoundaries = {} --table to hold shared boundaries
+    self.twinBoundaries = {} --table to hold shared boundaries
     self.outerBoundaries = {} --table to hold outer boundaries
 
 
@@ -53,7 +53,7 @@ function Space:new(name, bpgon, boundaries)
         --recreate shared boundaries table
         for i, v in pairs(boundaries) do
             if v.hasTwin then
-                table.insert(self.sharedBoundaries, v.twin)
+                table.insert(self.twinBoundaries, v.twin)
             end
         end
     end
@@ -79,7 +79,7 @@ function Space:shareBoundary(bi, ssi, sbi)
 
     bo:setAsTwins(sbo)
 
-    table.insert(self.sharedBoundaries, self.boundaries[bi].twin)
+    table.insert(self.twinBoundaries, self.boundaries[bi].twin)
     con:add("Shared my boundary #"..bi.." with space #"..ssi.."'s boundary #"..sbi)
     
 end
@@ -453,7 +453,7 @@ function Space:split(name)
     --split neighbouring boundaries, if shared
     local newSplitNeighbourSb = nil
     local newSplitNeighbourHb = nil
-    for i, twin in pairs(self.sharedBoundaries) do
+    for i, twin in pairs(self.twinBoundaries) do
         local bi = twin.bi
         local bo = twin.bo
         local sbi = twin.sbi
