@@ -77,7 +77,7 @@ function Space:shareBoundary(bi, ssi, sbi)
     bo = self.boundaries[bi]
     sbo = getObjectTree()[ssi].boundaries[sbi]
 
-    bo:setShared(sbo)
+    bo:setAsTwins(sbo)
 
     table.insert(self.sharedBoundaries, self.boundaries[bi].twin)
     con:add("Shared my boundary #"..bi.." with space #"..ssi.."'s boundary #"..sbi)

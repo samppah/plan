@@ -48,7 +48,7 @@ function Boundary:new(point1, point2, parentSpace)
 end
 
 
-function Boundary:setShared(boundary)
+function Boundary:setAsTwins(boundary)
     --sets "boundary" as a shared ("twin") boundary
     --as to self
 
