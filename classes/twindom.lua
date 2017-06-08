@@ -34,10 +34,15 @@ function Twindom:new(boundary1, boundary2)
 
 end
 
+function Twindom:update()
+    self.center = self.bo[1]:center()
+    self.bi = {self.bo[1]:getMyIndex(), self.bo[2]:getMyIndex()}
+end
+
 function Twindom:separate()
     local myIndex = 0
     for i, t in ipairs(twindoms) do
-        if t = self then
+        if t == self then
             myIndex = i
             break
         end
@@ -45,6 +50,27 @@ function Twindom:separate()
     table.remove(twindoms, myIndex)
 end
 
+function Twindom:contains(boundary)
+    return self.bo[1] == boundary or self.bo[2] == boundary
+end
+
+function Twindom:getTwinWithParent(space, exclusion)
+    --exclusion, if set true, returns the boundary
+    --whose parent is NOT the space
+    if space == self.so[1] then
+        if exclusion then
+            return self.bo[2]
+        else
+            return self.bo[1]
+        end
+    else
+        if exclusion then
+            return self.bo[1]
+        else
+            return self.bo[2]
+        end
+    end
+end
 
 function Twindom:draw()
 
@@ -70,18 +96,21 @@ function Twindom:draw()
     end
 
     if drawTwinLines then
+        local sin = math.sin
+        local cos = math.cos
+
         local offsetx = 5
         local offsety1 = 15
         local offsety2 = 5
         local ang2 = b1:angle()-math.pi*2 --angle of share line
-        local p = b1:pointAtLen(self:len()/2-offset)
+        local p = b1:pointAtLen(b1:len()/2-offsetx)
         local spx = p[1] + offsetx * sin(ang2)
         local spy = p[2] + offsety1 * cos(ang2)
         local epx = p[1] - offsetx * sin(ang2)
         local epy = p[2] - offsety2 * cos(ang2)
         love.graphics.line(spx,spy,epx,epy)
 
-        local p = b1:pointAtLen(self:len()/2+offset)
+        local p = b1:pointAtLen(b1:len()/2+offsetx)
         local spx = p[1] + offsetx * sin(ang2)
         local spy = p[2] + offsety2 * cos(ang2)
         local epx = p[1] - offsetx * sin(ang2)

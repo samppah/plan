@@ -5,6 +5,7 @@ local stringFuncs = require "strings"
 local pmath = require "pmath"
 
 local con = getCon() --get ref to main console
+local twindoms = getTwindoms() --get ref to twindoms
 
 function Boundary:new(point1, point2, parentSpace)
 --function Boundary:new(x1,y1,x2,y2)
@@ -19,10 +20,11 @@ function Boundary:new(point1, point2, parentSpace)
     self.type = "wall" --further types ex. border?
     self.features = {} --have a table for doors, windows, etc.
     self.showInfo = false --show metrics
-    self.showPoints = true --show points
+    self.showPoints = false --show points
     self.showDir = false --show boundary direction
     self.isSelected = false
     self.guideMode = "off" --/"inverse"/"both"/"off"
+    self.showTwin = true
     self.guides = {}
     self.guides.normal, --from boundary point 1 (last one(s?) over)
     self.guides.inverse, --from boundary point 2 (last one(s?) over)
@@ -35,9 +37,13 @@ function Boundary:new(point1, point2, parentSpace)
 
     --shared boundary info
     --boundary can be either: shared or outer
+    --
+    --[[
     self.isOuter = true --default
     self.hasTwin = false --default
+    --]]
 
+    --[[
     self.twin = {}
     self.twin.bo = self
     self.twin.bi = nil -- my index (boundary index in my parent space)
@@ -45,10 +51,12 @@ function Boundary:new(point1, point2, parentSpace)
     self.twin.sbi = nil --shared boundary index
     self.twin.sso = nil --shared space object
     self.twin.ssi = nil --shared space index
+    --]]
 end
 
 function Boundary:validateTwin(boundary)
     --a twin boundary has same endpoints but in reverse order
+    --[[
     local sp1x = self.p1.x
     local sp1y = self.p1.y
     local ep1x = self.p2.x
@@ -63,9 +71,11 @@ function Boundary:validateTwin(boundary)
     local ep = math.abs(ep1x - sp2x) < EPS and math.abs(ep1y - sp2y) < EPS
 
     return (sp and ep)
+    --]]
 end
 
 function Boundary:isMyTwin(boundary)
+    --[[
     --returns true if boundary is a twin of self
     local validated = self:validateTwin(boundary)
     if validated then
@@ -77,9 +87,11 @@ function Boundary:isMyTwin(boundary)
     else
         return false
     end
+    --]]
 end
 
 function Boundary:setAsTwins(boundary)
+    --[[
     --sets "boundary" as a shared ("twin") boundary
     --only alters data
     --as to self
@@ -105,15 +117,19 @@ function Boundary:setAsTwins(boundary)
     boundary.twin.sbi = self.twin.bo:getMyIndex()
     boundary.twin.sso = self.parent
     boundary.twin.ssi = self.parent:getMyIndex()
+    --]]
 end
 
 function Boundary:createTwin()
+    --[[
     --returns a new twin boundary for self
     --this boundary does NOT have a parent space!
     local twin = Boundary(self.p2.x, self.p2.y, self.p1.x, self.p1.y)
     self:setAsTwins(twin)
     return twin
+    --]]
 end
+
 function Boundary:getData(mode)
     --returns a table for passable boundary data
     --mode: "keys" / "data"
@@ -137,9 +153,10 @@ function Boundary:getData(mode)
     --table.insert(passableKeys, "isSelected")
     --table.insert(passableKeys, "guideMode")
     --table.insert(passableKeys, "guides")
-    table.insert(passableKeys, "isOuter")
-    table.insert(passableKeys, "hasTwin")
-    table.insert(passableKeys, "twin")
+    --table.insert(passableKeys, "isOuter")
+    --table.insert(passableKeys, "hasTwin")
+    --table.insert(passableKeys, "twin")
+    table.insert(passableKeys, "parent")
     for i, v in pairs(passableKeys) do
         data[v] = self[v]
     end
@@ -193,38 +210,6 @@ function Boundary:draw()
         love.graphics.print(stringFuncs.formatText(infotxt),unpack(self:center()))
     end
 
-    --draw share lines
-    --make share lines blink RED when space is selected,
-    --show faded red otherwise
-    local drawShareLines = false
-    if self.hasTwin then
-        if self.parent.isSelected then
-            if getBlinkStat() then
-                love.graphics.setColor(255,0,0)
-                drawShareLines = true
-            end
-        else
-            love.graphics.setColor(255,0,0,128)
-            drawShareLines = true
-        end
-    end
-    if drawShareLines then
-        local offset = 10
-        local ang2 = self:angle()-math.pi*2 --angle of share line
-        local p = self:pointAtLen(self:len()/2-offset)
-        local spx = p[1] + offset * sin(ang2)
-        local spy = p[2] + offset * cos(ang2)
-        local epx = p[1] - offset * sin(ang2)
-        local epy = p[2] - offset * cos(ang2)
-        love.graphics.line(spx,spy,epx,epy)
-
-        local p = self:pointAtLen(self:len()/2+offset)
-        local spx = p[1] + offset * sin(ang2)
-        local spy = p[2] + offset * cos(ang2)
-        local epx = p[1] - offset * sin(ang2)
-        local epy = p[2] - offset * cos(ang2)
-        love.graphics.line(spx,spy,epx,epy)
-    end
 
     if self.showPoints then
         self.p1:draw()
@@ -333,7 +318,7 @@ function Boundary:split(len)
         newPoint2 = Point(xe, ye)
     end
     local newBoundary = Boundary(newPoint1, newPoint2, self.parent)
-    --pass data to new boundary
+    --simply pass data to new boundary
     self:setData(newBoundary)
     return newBoundary, {newPoint1.x, newPoint1.y}
 end

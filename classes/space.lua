@@ -4,10 +4,64 @@ Space.debug = true
 
 local stringFuncs = require "strings"
 local pmath = require "pmath"
-
 local con = getCon() --get ref to main console
+local twindoms = getTwindoms()
 
 require "classes/Boundary"
+require "classes/twindom"
+
+
+function normBIndex(btl, bi)
+    --normalize a boundary index
+    --btl = boundary table length
+    --bi = boundary index, possibly out of bounds
+    --
+    if bi < 1 then
+        while bi < 1 do
+            bi = btl + bi
+        end
+    elseif bi > btl then
+        while bi > btl do
+            bi = -btl + bi
+        end
+    end
+    return bi
+end
+
+function bIter(table, start, end_)
+    --an iterator function to loop over
+    --boundaries tables ends to beginnings
+    --
+    --end_ is not normalized (=possibly out of bounds)
+    --
+    local i = 0
+    local len = #table
+    if end_ <= start then
+        --a loopover case
+        end_ = end_ + len
+    end
+    local lenE = end_ - start
+
+    local safety = 1000
+
+    return function()
+        i = i + 1
+        safety = safety - 1
+        
+        if safety < 0 then
+            con:add("botched loop")
+            return nil
+        end
+
+        if i > lenE then
+            --the number of boundaries have been looped over
+            return nil
+        end
+
+        return normBIndex(len, start + i - 1), table[normBIndex(len, start + i - 1)]
+
+    end
+end
 
 
 function Space:new(name, bpgon, boundaries)
@@ -32,8 +86,8 @@ function Space:new(name, bpgon, boundaries)
     self.isSelected = false
     self.debug = false
 
-    self.twinBoundaries = {} --table to hold shared boundaries
-    self.outerBoundaries = {} --table to hold outer boundaries
+    --self.twinBoundaries = {} --table to hold shared boundaries
+    --self.outerBoundaries = {} --table to hold outer boundaries
 
 
     --insert space into main object tree for GUI functions
@@ -50,18 +104,22 @@ function Space:new(name, bpgon, boundaries)
         for i, v in pairs(boundaries) do
             v.parent = self
         end
+        --[[
         --recreate shared boundaries table
         for i, v in pairs(boundaries) do
             if v.hasTwin then
                 table.insert(self.twinBoundaries, v.twin)
             end
         end
+        --]]
     end
 
+    --[[
     --set default shared and outer
     for i, b in pairs(self.boundaries) do
         self:setOuter(i)
     end
+    --]]
 end
 
 function Space:update(bpgon, boundaries)
@@ -74,6 +132,7 @@ function Space:setAsTwinBoundaries(bi, ssi, sbi)
     --ssi = index of parent space of shared boundary
     --sbi = index of boundary of the adjacent space to share
 
+    --[[
     bo = self.boundaries[bi]
     sbo = getObjectTree()[ssi].boundaries[sbi]
 
@@ -94,15 +153,18 @@ function Space:setAsTwinBoundaries(bi, ssi, sbi)
 
     table.insert(self.twinBoundaries, self.boundaries[bi].twin)
     con:add("Shared my boundary #"..bi.." with space #"..ssi.."'s boundary #"..sbi)
+    --]]
     
 end
 
 
 function Space:setOuter(bi)
+    --[[
     --set outer
     local outerRef = {}
     table.insert(self.outerBoundaries, bi)
     con:add("Set my boundary #"..bi.." outer.")
+    --]]
 end
 
 
@@ -378,6 +440,26 @@ function Space:findGuideHitpoint(sgo, sbo)
     return hb, hbo, hpx, hpy
 end
 
+function Space:splitBoundary(boundary)
+    --splits a boundary object
+    if not boundary.parent == self then
+        con:add("malformed splitBoundary call")
+        return
+    end
+
+    local btl = #self.boundaries
+    local bi = boundary:getMyIndex()
+
+    local newB, nx, ny = boundary:split()
+    table.insert(self.boundaries, normBIndex(btl, bi+1), newBoundary)
+
+    --manage space.bpgon
+    table.insert(self.bpgon, normBIndex(btl, bi)*2+1, nx)
+    table.insert(self.bpgon, normBIndex(btl, bi)*2+1, ny) --the same index, we push and slide
+
+    return newB
+end
+
 
 function Space:split(name)
     --splits a space into two
@@ -429,6 +511,7 @@ function Space:split(name)
     --split neighbouring boundaries along split points
     local newSplitNeighbourSb = nil --these are used after the spaces are created
     local newSplitNeighbourHb = nil
+    --[[
     for i, twin in pairs(self.twinBoundaries) do
         if twin.bo == sbo or twin.bo == hbo then
             --only twins of these two need splitting
@@ -455,61 +538,41 @@ function Space:split(name)
             
         end
     end
+    --]]
+
+    --manage twindoms
+    local nsnSb = nil --new to-split neighbour on selected boundary side
+    local nsnHb = nil --hit boundary side
+    for i, t in pairs(twindoms) do
+
+        local exclude = true
+        if t:contains(sbo) then 
+
+            --get the neighbouring space side boundary
+            nsnSb = t:getTwinWithParent(self, exclude) 
+            t:separate()
+
+        elseif t:contains(hbo) then
+
+            --get the neighbouring space side boundary
+            nsnHb = t:getTwinWithParent(self, exclude) 
+
+        end
+    end
+
+    local newBSb = nil --new boundary on selected boundary side
+    local newBHb = nil --hit boundary side
+    if nsnSb then
+        newBSb = nsnSb.parent:splitBoundary(nsnSb) 
+        local newTwindomSb = Twindom(self.boundaries[#self.boundaries], newBSb) 
+    end
+    if nsnHb then
+        newBHb = nsnHb.parent:splitBoundary(nsnHb) 
+    end
 
 
 
     --CREATE BOUNDARIES FOR SPACES
-    function normBIndex(btl, bi)
-        --normalize a boundary index
-        --btl = boundary table length
-        --bi = boundary index, possibly out of bounds
-        --
-        if bi < 1 then
-            while bi < 1 do
-                bi = btl + bi
-            end
-        elseif bi > btl then
-            while bi > btl do
-                bi = -btl + bi
-            end
-        end
-        return bi
-    end
-
-    function bIter(table, start, end_)
-        --an iterator function to loop over
-        --boundaries tables ends to beginnings
-        --
-        --end_ is not normalized (=possibly out of bounds)
-        --
-        local i = 0
-        local len = #table
-        if end_ <= start then
-            --a loopover case
-            end_ = end_ + len
-        end
-        local lenE = end_ - start
-
-        local safety = 1000
-
-        return function()
-            i = i + 1
-            safety = safety - 1
-            
-            if safety < 0 then
-                con:add("botched loop")
-                return nil
-            end
-
-            if i > lenE then
-                --the number of boundaries have been looped over
-                return nil
-            end
-
-            return normBIndex(len, start + i - 1), table[normBIndex(len, start + i - 1)]
-
-        end
-    end
 
 
 
@@ -642,14 +705,20 @@ function Space:split(name)
     --update old boundaries
     self:update(s1Bpgon, s1Boundaries)
 
-    --create new space
+    --create new space. this also sets correct boundary parents.
     local s2 = Space(name, s2Bpgon, s2Boundaries)
 
-    --set boundary parents! these could not be set when creating them
-    for i, b in pairs(s2.boundaries) do
-        b.parent = s2
+
+    --update twindoms
+    for i, t in pairs(twindoms) do
+        t:update()
+    end
+    local newTwindomShared = Twindom(s1b1, s2b1)
+    if newBHb then
+        local newTwindomHb = Twindom(newBHb,  s2b3)
     end
 
+    --[[
     --set twin info
     --new boundary is shared with self, new space
     local setSBI1=1
@@ -669,6 +738,7 @@ function Space:split(name)
         local n = newSplitNeighbourHb
         s2:setAsTwinBoundaries(2, n.parent:getMyIndex(), n:getMyIndex())
     end
+    --]]
 
     --[[
     --debug space boundary data
@@ -695,6 +765,7 @@ function Space:getMyIndex()
 end
 
 function Space:getMyTwins()
+    --[[
     --updates twinBoundaries info
     self.twinBoundaries = {}
     for i, b in pairs(self.boundaries) do
@@ -702,6 +773,7 @@ function Space:getMyTwins()
             table.insert(self.twinBoundaries, b.twin)
         end
     end
+    --]]
 end
 
 function Space:area()
@@ -773,11 +845,6 @@ function Space:center()
     return {mpx,mpy}
 end
 
-function Space:splitBoundary(index)
-    --splits a boundary object
-    local newBoundary = self.boundaries[index]:split()
-    table.insert(self.boundaries, index+1, newBoundary)
-end
 
 function Space:getBoundaryAngles()
     local angles = {}
