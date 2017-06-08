@@ -1,4 +1,4 @@
---math.randomseed(os.time())
+math.randomseed(os.time())
 
 Object = require "libraries/classic"
 
@@ -7,9 +7,9 @@ function getObjectTree()
     --this can be called by subs to get main objectTree reference
     return objectTree
 end
-twinhood = {} --a table to hold all boundary twinhoodds
-function getTwinhood()
-    return twinhood
+twindoms = {} --a table to hold all boundary twinhoodds
+function getTwindoms()
+    return twindoms
 end
 
 local blinkTimer = 0
@@ -27,12 +27,12 @@ function getCon()
     --a function for classes to use the main console
     return con
 end
+
+
 selectionMode = "space" --/"boundary"
-
-globalGrid = 30
+showTwindoms = true
+globalGrid = 30 --for guide setting
 EPS = 0.00001
-
-
 globalDecimals = 3 --for all results round STRINGS to this number of decimals
 
 
@@ -153,6 +153,12 @@ function love.draw()
     con:draw()
     --cursor:draw()
     g1:draw()
+
+    if showTwindoms then
+        for i, t in pairs(twindoms) do
+            t:draw()
+        end
+    end
 
 end
 
@@ -525,6 +531,9 @@ keyEvents.toggleBoundaryGuideMode = function()
     end
 end
 
+keyEvents.toggleShowTwindoms = function()
+    showTwindoms = not showTwindoms
+end
 
 
 
@@ -574,6 +583,7 @@ addKeyMapping("g", keyEvents.toggleBoundaryGuideMode, "toggleBoundaryGuideMode")
 addKeyMapping("q", keyEvents.quit, "quit")
 addKeyMapping("escape", keyEvents.quit, "quit")
 addKeyMapping(",", keyEvents.showMappings, "showMappings")
+addKeyMapping("t", keyEvents.toggleShowTwindoms, "toggleShowTwindoms")
 
 local repeatingKeys = {
     "h","l","j","k"

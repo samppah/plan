@@ -78,7 +78,16 @@ function Space:setAsTwinBoundaries(bi, ssi, sbi)
     sbo = getObjectTree()[ssi].boundaries[sbi]
 
     if not sbo then
-        con:add("no sbo!")
+        con:add("no sbo, when trying setAsTwinBoundaries with sbi #"..sbi)
+        local firstindex = 0
+        for i = 1, 100 do
+            sbo = getObjectTree()[ssi].boundaries[i]
+            if sbo then
+                firstindex = i
+                break
+            end
+        end
+        con:add("first good index in ssi: #"..firstindex)
         return
     end
     bo:setAsTwins(sbo)
@@ -299,13 +308,16 @@ function Space:chooseSplitGuide(sbo)
 end
 
 
-function Space:findGuideHitpoint(sgo)
+function Space:findGuideHitpoint(sgo, sbo)
     --returns boundary index and object of the boundary
     --which gets hit by the guide object
     --and the coordinates of the hit
     --
     --calculate guide hitpoint with a boundary
     --it is always pointing inwards. which is nice.
+    --
+    --sbo = the boundary from which the guide ray is cast
+    --avoid intersection with this!
 
     local hb = 0 --"hitBoundary", the index of boundary receiving a guideline hit in split
     local hbo = nil -- hitBoundary object
@@ -313,7 +325,7 @@ function Space:findGuideHitpoint(sgo)
     local hpy = 0
 
     for i,b in ipairs(self.boundaries) do
-        if i == sb then
+        if i == sbo:getMyIndex() then
             --no test for selected boundary ("self")
         else
             con:add("testing boundary #"..i)
@@ -396,7 +408,7 @@ function Space:split(name)
 
 
     --calculate guide hitpoint with a boundary
-    local hb, hbo, hpx, hpy = self:findGuideHitpoint(sgo)
+    local hb, hbo, hpx, hpy = self:findGuideHitpoint(sgo, sbo)
 
     con:add("found hitpoint for split at boundary #"..hb)
     con:add("hitpoint x:"..hpx.." hitpoint y:"..hpy)
@@ -608,6 +620,8 @@ function Space:split(name)
         --put in boundary reconstruction table
         table.insert(s2Boundaries, tailBoundaries2[i])
 
+        con:add("was here")
+
     end
     local beforelastpoint = Point(s2PointsE[ptI].x, s2PointsE[ptI].y)
     local lastpoint = Point(s2PointsS[1].x, s2PointsS[1].y)
@@ -630,6 +644,11 @@ function Space:split(name)
 
     --create new space
     local s2 = Space(name, s2Bpgon, s2Boundaries)
+
+    --set boundary parents! these could not be set when creating them
+    for i, b in pairs(s2.boundaries) do
+        b.parent = s2
+    end
 
     --set twin info
     --new boundary is shared with self, new space
