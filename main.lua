@@ -7,6 +7,10 @@ function getObjectTree()
     --this can be called by subs to get main objectTree reference
     return objectTree
 end
+twinhood = {} --a table to hold all boundary twinhoodds
+function getTwinhood()
+    return twinhood
+end
 
 local blinkTimer = 0
 local blinkSec = 0.5
@@ -26,7 +30,7 @@ end
 selectionMode = "space" --/"boundary"
 
 globalGrid = 30
-EPS = 0.001
+EPS = 0.00001
 
 
 globalDecimals = 3 --for all results round STRINGS to this number of decimals
@@ -93,8 +97,7 @@ function love.load()
 
     cursor = Cursor()
 
-
-    --[[
+--[[
     --PRE SPLIT
     --split the master space into desiredRooms nr of spaces
     local safety = 1000
@@ -116,8 +119,9 @@ function love.load()
         end
     end
     con:add("PreSplitting done, after "..1000-safety.."tries")
-    --]]
 
+
+--]]
 
     --[[
     --try passing data

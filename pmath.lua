@@ -59,7 +59,7 @@ function pmath:findIntersect(l1p1x,l1p1y, l1p2x,l1p2y, l2p1x,l2p1y, l2p2x,l2p2y,
     -- from: https://love2d.org/forums/viewtopic.php?f=4&t=12175&p=73352&hilit=line+intersection#p73352
     -- Checks if two lines intersect (or line segments if seg is true)
     -- Lines are given as four numbers (two coordinates)
-    local tolerance = 0.000001 -- added tolerance
+    local tolerance = EPS -- added tolerance
     local a1,b1,a2,b2 = l1p2y-l1p1y, l1p1x-l1p2x, l2p2y-l2p1y, l2p1x-l2p2x
     local c1,c2 = a1*l1p1x+b1*l1p1y, a2*l2p1x+b2*l2p1y
     local det = a1*b2 - a2*b1

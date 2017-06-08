@@ -339,10 +339,10 @@ function Boundary:split(len)
 end
 
 function Boundary:overlaps(boundary)
-    if self.p1.x == boundary.p1.x and self.p1.y == boundary.p1.y then
+    if math.abs(self.p1.x - boundary.p1.x) < EPS and math.abs(self.p1.y - boundary.p1.y) < EPS then
         return true
     elseif
-        self.p2.x == boundary.p1.x and self.p2.y == boundary.p2.y then
+        math.abs(self.p2.x - boundary.p1.x) < EPS and math.abs(self.p2.y - boundary.p2.y) < EPS then
         return true
     else
         return false

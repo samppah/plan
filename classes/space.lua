@@ -77,6 +77,10 @@ function Space:setAsTwinBoundaries(bi, ssi, sbi)
     bo = self.boundaries[bi]
     sbo = getObjectTree()[ssi].boundaries[sbi]
 
+    if not sbo then
+        con:add("no sbo!")
+        return
+    end
     bo:setAsTwins(sbo)
 
     table.insert(self.twinBoundaries, self.boundaries[bi].twin)
@@ -123,13 +127,16 @@ function Space:createBoundaries()
 end
 
 function Space:draw()
-    --draw self
+
+    --draw boundaries of self
     for i, v in ipairs(self.boundaries) do
         v:draw(i)
     end
 
-    --draw selection indicator
     if self.isSelected then
+
+
+        --draw selection indicator
         local alpha
         if selectionMode == "space" then
             alpha = 128
@@ -139,6 +146,7 @@ function Space:draw()
         love.graphics.setColor(255, 255, 0, alpha)
         love.graphics.polygon("fill", unpack(self.bpgon))
     end
+
     --draw info
     if self.showInfo then
         love.graphics.setColor(255, 255, 255)
@@ -209,7 +217,7 @@ function Space:chooseSplitBoundary()
                     at[i] = (at[i-1] or amin) + math.pi/2
                 end
                 --check for a match
-                local tolerance = 0.0000000001
+                local tolerance = EPS
                 local is90 = false
                 for i = 1,3 do
                     if math.abs(at[i]-amax) < tolerance then
@@ -324,26 +332,22 @@ function Space:findGuideHitpoint(sgo)
                 local tlx2 = b.p2.x
                 local tly2 = b.p2.y
 
-                local doCross = pmath:checkIntersect(
-                    {x = glx1, y = gly1},
-                    {x = glx2, y = gly2},
-                    {x = tlx1, y = tly1},
-                    {x = tlx2, y = tly2})
-
-                if not doCross then
-                    break --exit faux do loop
-                end
-
-                --they cross! yeah baby!
-                hb = i
-                hbo = self.boundaries[hb]
                 
                 --find point of intersect (hpx, hpy)
                 hpx, hpy = pmath:findIntersect(
                     glx1,gly1,glx2,gly2,
                     tlx1,tly1,tlx2,tly2,
-                    true, true
+                    true, true,
+                    sbo
                     )
+                
+                if hpx == false then
+                    --no crossing
+                    hb = 0
+                else
+                    hb = i
+                    hbo = self.boundaries[hb]
+                end
 
             until true --end of faux do loop
 
@@ -387,23 +391,27 @@ function Space:split(name)
         return
     end
 
+    con:add("selected guide #"..sg.." for split")
+    con:add("guide x:"..sgo.point.x.." guide y:"..sgo.point.y)
+
 
     --calculate guide hitpoint with a boundary
     local hb, hbo, hpx, hpy = self:findGuideHitpoint(sgo)
 
-    if hb == 0 then
-        print("No hb found!"..hb)
-        con:add("Weird shit: Could not find hb")
+    con:add("found hitpoint for split at boundary #"..hb)
+    con:add("hitpoint x:"..hpx.." hitpoint y:"..hpy)
+
+    local hitPoint = Point(hpx,hpy)
+    if hitPoint:overlaps(sgo.point) then
+        --this is weird
+        con:add("hitpoint overlaps split point. won't split")
         return
     end
-    if hpx == false then
-        --a hit predicted but no hit point registered
-        --some tolerance issues with pmath:findIntersect did this
-        con:add("weird shit: checkIntersect >< findIntersect"..hpy)
+    if hbo == sbo then
+        --this is weird
+        con:add("hbo == sbo. won't split.")
         return
     end
-
-
 
 
     --split neighbouring boundaries along split points
@@ -634,7 +642,7 @@ function Space:split(name)
     --set twin information for new split neighbours
     if newSplitNeighbourSb then
         --it's the same sharing info
-        local n = newSplitNeighboursb
+        local n = newSplitNeighbourSb
         self:setAsTwinBoundaries(#self.boundaries, n.parent:getMyIndex(), n:getMyIndex())
     end
 
