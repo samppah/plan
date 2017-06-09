@@ -188,16 +188,25 @@ function Boundary:getMyIndex()
             return i
         end
     end
+    --if not returned, my parent info is
+    --malformed
+    con:add("returned a nil from boundary:getmyindex()")
 end
 
 
 function Boundary:draw()
-        local sin = math.sin
-        local cos = math.cos
-    if self.isSelected then
-        love.graphics.setColor(255, 0, 255)
+    local sin = math.sin
+    local cos = math.cos
+
+    if self.parent.isSelected then
+        alpha = 255
     else
-        love.graphics.setColor(255, 255, 255)
+        alpha = 64
+    end
+    if self.isSelected then
+        love.graphics.setColor(255, 0, 255, alpha)
+    else
+        love.graphics.setColor(255, 255, 255, alpha)
     end
     love.graphics.line(self.p1.x,self.p1.y,self.p2.x,self.p2.y)
 
@@ -207,7 +216,8 @@ function Boundary:draw()
         local index = self:getMyIndex()
         local infotxt = "#" .. index .. " " .. self:angle() .. "\n" .. "hasTwin = " .. (self.hasTwin and "true" or "false")
         
-        love.graphics.print(stringFuncs.formatText(infotxt),unpack(self:center()))
+        local lenratio = .8
+        love.graphics.print(stringFuncs.formatText(infotxt),unpack(self:pointAtLen(self:len()*lenratio)))
     end
 
 
@@ -215,13 +225,13 @@ function Boundary:draw()
         self.p1:draw()
         self.p2:draw()
     end
+
     if self.guideMode ~= "off" then
         self:drawGuides()
     end
 
     if self.showDir then
         love.graphics.setColor(255,255,255,128)
-
 
         --draw arrow body
         local offset = 15
@@ -247,7 +257,6 @@ function Boundary:draw()
         local tipepx = epx + tiplen * sin(ang2)
         local tipepy = epy + tiplen * cos(ang2)
         love.graphics.line(tipspx, tipspy, tipepx, tipepy)
-
         
     end
 end

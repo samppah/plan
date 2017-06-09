@@ -39,6 +39,47 @@ function Twindom:update()
     self.bi = {self.bo[1]:getMyIndex(), self.bo[2]:getMyIndex()}
 end
 
+function Twindom:replace(old, new)
+    local oldRef = 0
+    if self.bo[1] == old then
+        oldRef = 1
+    elseif self.bo[2] == old then
+        oldRef = 2
+    end
+    if oldRef == 0 then
+        con:add("can't replace old in twindom. old is not contained")
+        return
+
+        --maybe a way to test if new boundary is a part of
+        --one of the spaces, specifically of the same, where
+        --the old is contained in
+    elseif oldRef == 1 then
+        if new.parent ~= old.parent then
+            con:add("can't replace old in twindom. new has a different parent")
+            return
+        elseif new.parent ~= self.so[1] then
+            con:add("can't replace old in twindom. new has a different parent")
+            return
+        else
+            --do it
+            self.bo[1] = new
+        end
+    else
+        --oldRef == 2
+        if new.parent ~= old.parent then
+            con:add("can't replace old in twindom. new has a different parent")
+            return
+        elseif new.parent ~= self.so[2] then
+            con:add("can't replace old in twindom. new has a different parent")
+            return
+        else
+            --do it
+            self.bo[2] = new
+        end
+    end
+    self:update()
+end
+
 function Twindom:separate()
     local myIndex = 0
     for i, t in ipairs(twindoms) do
@@ -85,17 +126,20 @@ function Twindom:draw()
     local s1 = self.so[1]
     local s2 = self.so[2]
 
+    local alpha = 255
     if s1.isSelected or s2.isSelected then
         if getBlinkStat() then
+            alpha = 255
             love.graphics.setColor(255,0,0)
             drawTwinLines = true
         end
     else
-        love.graphics.setColor(255,0,0,128)
+        alpha = 128
         drawTwinLines = true
     end
 
     if drawTwinLines then
+        --[[
         local sin = math.sin
         local cos = math.cos
 
@@ -116,6 +160,11 @@ function Twindom:draw()
         local epx = p[1] - offsetx * sin(ang2)
         local epy = p[2] - offsety1 * cos(ang2)
         love.graphics.line(spx,spy,epx,epy)
+        --]]
+        love.graphics.setColor(255,0,0,alpha)
+        love.graphics.circle("fill", b1:center()[1], b1:center()[2], 10)
+        love.graphics.setColor(0,255,0,alpha)
+        love.graphics.circle("fill", b2:center()[1], b2:center()[2], 5)
     end
 
 end

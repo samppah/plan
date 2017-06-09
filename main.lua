@@ -535,6 +535,13 @@ keyEvents.toggleShowTwindoms = function()
     showTwindoms = not showTwindoms
 end
 
+keyEvents.unselectAllBoundaries = function()
+    for i, s in pairs(objectTree) do
+        for i, b in pairs(s.boundaries) do
+            b.isSelected = false
+        end
+    end
+end
 
 
 keyEvents.quit = function()
@@ -584,6 +591,7 @@ addKeyMapping("q", keyEvents.quit, "quit")
 addKeyMapping("escape", keyEvents.quit, "quit")
 addKeyMapping(",", keyEvents.showMappings, "showMappings")
 addKeyMapping("t", keyEvents.toggleShowTwindoms, "toggleShowTwindoms")
+addKeyMapping("u", keyEvents.unselectAllBoundaries, "unselectAllBoundaries")
 
 local repeatingKeys = {
     "h","l","j","k"
@@ -618,7 +626,14 @@ function love.keypressed(key, scancode, isRepeat)
     end
 
     --print char (terminal only)
-    print("key:"..key.." scancode:"..scancode)
+    local description = "-"
+    for i,m in ipairs(keys.mappingInfo) do
+        if m.key == key then
+            description = m.description
+            break
+        end
+    end
+    print("key:"..key.." scancode:"..scancode.." / "..description)
 end
 
 function love.keyreleased(key)

@@ -241,6 +241,12 @@ end
 
 function Space:chooseSplitBoundary()
     --returns a candidate for splitting (index, object)
+    --or the selected boundary
+    for i, b in ipairs(self.boundaries) do
+        if b.isSelected then
+            return i, b
+        end
+    end
 
     local function rateByPrevalence()
         --collect the angles and rate by prevalence
@@ -440,25 +446,33 @@ function Space:findGuideHitpoint(sgo, sbo)
     return hb, hbo, hpx, hpy
 end
 
-function Space:splitBoundary(boundary)
+
+
+function Space:splitBoundary(boundary, atLen)
     --splits a boundary object
+    if not boundary then
+        con:add("malformed splitBoundary call")
+        return
+    end
     if not boundary.parent == self then
         con:add("malformed splitBoundary call")
         return
     end
 
-    local btl = #self.boundaries
     local bi = boundary:getMyIndex()
 
-    local newB, nx, ny = boundary:split()
-    table.insert(self.boundaries, normBIndex(btl, bi+1), newBoundary)
+    local newB, nx, ny = boundary:split(atLen)
+    table.insert(self.boundaries, normBIndex(btl, bi+1), newB)
 
+    local btl = #self.boundaries
+    bi = boundary:getMyIndex()
     --manage space.bpgon
     table.insert(self.bpgon, normBIndex(btl, bi)*2+1, nx)
     table.insert(self.bpgon, normBIndex(btl, bi)*2+1, ny) --the same index, we push and slide
 
     return newB
 end
+
 
 
 function Space:split(name)
@@ -509,36 +523,6 @@ function Space:split(name)
 
 
     --split neighbouring boundaries along split points
-    local newSplitNeighbourSb = nil --these are used after the spaces are created
-    local newSplitNeighbourHb = nil
-    --[[
-    for i, twin in pairs(self.twinBoundaries) do
-        if twin.bo == sbo or twin.bo == hbo then
-            --only twins of these two need splitting
-            local atLen = sgo.atLen
-            local atInvLen = hbo:len()-sgo.atLen
-            local newB = nil
-            if twin.bo == sbo then
-                newB = sbo:split(atLen) 
-                newSplitNeighbourSb = newB
-                con:add("sb")
-            else
-                newB = twin.sbo:split(atInvLen)
-                newSplitNeighbourHb = newB
-                con:add("hb")
-            end
-            local sso = twin.sso
-            --manage sso.boundaries
-            local ssobtl = #sso.boundaries
-            local sbi = twin.sbo:getMyIndex()
-            table.insert(sso.boundaries, normBIndex(ssobtl, sbi+1), newB)
-            --manage sso.bpgon
-            table.insert(sso.bpgon, normBIndex(ssobtl, sbi)*2+1, newB.p1.y)
-            table.insert(sso.bpgon, normBIndex(ssobtl, sbi)*2+1, newB.p1.x) --the same index, we push and slide
-            
-        end
-    end
-    --]]
 
     --manage twindoms
     local nsnSb = nil --new to-split neighbour on selected boundary side
@@ -563,20 +547,17 @@ function Space:split(name)
     local newBSb = nil --new boundary on selected boundary side
     local newBHb = nil --hit boundary side
     if nsnSb then
-        newBSb = nsnSb.parent:splitBoundary(nsnSb) 
-        local newTwindomSb = Twindom(self.boundaries[#self.boundaries], newBSb) 
+        newBSb = nsnSb.parent:splitBoundary(nsnSb, sbo:len()-sgo.atLen) 
+        local newTwindomSb = Twindom(self.boundaries[1], newBSb) 
     end
     if nsnHb then
-        newBHb = nsnHb.parent:splitBoundary(nsnHb) 
+        newBHb = nsnHb.parent:splitBoundary(nsnHb, sgo.atLen) 
     end
+
 
 
 
     --CREATE BOUNDARIES FOR SPACES
-
-
-
-
 
     local btl = #self.boundaries --boundary table length
 
@@ -621,6 +602,15 @@ function Space:split(name)
         b:setData(tailBoundaries[i])
         --put boundary in reconstruction table
         table.insert(s1Boundaries, tailBoundaries[i])
+
+        --manage twindoms
+        for _, t in pairs(twindoms) do
+            if t:contains(b) then
+                --[[
+                t:replace(b, tailBoundaries[i])
+                --]]
+            end
+        end
     end
 
     --and create last, closing boundary
@@ -683,7 +673,14 @@ function Space:split(name)
         --put in boundary reconstruction table
         table.insert(s2Boundaries, tailBoundaries2[i])
 
-        con:add("was here")
+        --manage twindoms
+        for _, t in pairs(twindoms) do
+            if t:contains(b) then
+                --[[
+                t:replace(b, tailBoundaries2[i])
+                --]]
+            end
+        end
 
     end
     local beforelastpoint = Point(s2PointsE[ptI].x, s2PointsE[ptI].y)
@@ -715,7 +712,9 @@ function Space:split(name)
     end
     local newTwindomShared = Twindom(s1b1, s2b1)
     if newBHb then
-        local newTwindomHb = Twindom(newBHb,  s2b3)
+        --[[
+        local newTwindomHb = Twindom(newBHb, s2b3)
+        --]]
     end
 
     --[[
