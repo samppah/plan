@@ -181,6 +181,8 @@ function Twindom:draw()
         if getBlinkStat() then
             alpha = 255
             love.graphics.setColor(255,0,0)
+        else
+            drawTwinSymbols = false
         end
     else
         alpha = 128
@@ -188,10 +190,42 @@ function Twindom:draw()
 
     if drawTwinSymbols then
         if self.isWonky then
+            local sin = math.sin
+            local cos = math.cos
+
+            local offset = 10
+            local ang2 = b1:angle()-math.pi*2 --angle of share line
+
             love.graphics.setColor(255,0,0,alpha)
-            love.graphics.circle("line", b1:center()[1], b1:center()[2], 10)
+            local p = b1:pointAtLen(b1:len()/2-offset)
+            local spx = p[1] + offset * sin(ang2)
+            local spy = p[2] + offset * cos(ang2)
+            local epx = p[1] - offset * sin(ang2)
+            local epy = p[2] - offset * cos(ang2)
+            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
+
+            local p = b1:pointAtLen(b1:len()/2+offset)
+            local spx = p[1] + offset * sin(ang2)
+            local spy = p[2] + offset * cos(ang2)
+            local epx = p[1] - offset * sin(ang2)
+            local epy = p[2] - offset * cos(ang2)
+            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
+
+            local offset = 5 
             love.graphics.setColor(0,255,0,alpha)
-            love.graphics.circle("line", b2:center()[1], b2:center()[2], 5)
+            local p = b1:pointAtLen(b1:len()/2-offset)
+            local spx = p[1] + offset * sin(ang2)
+            local spy = p[2] + offset * cos(ang2)
+            local epx = p[1] - offset * sin(ang2)
+            local epy = p[2] - offset * cos(ang2)
+            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
+
+            local p = b1:pointAtLen(b1:len()/2+offset)
+            local spx = p[1] + offset * sin(ang2)
+            local spy = p[2] + offset * cos(ang2)
+            local epx = p[1] - offset * sin(ang2)
+            local epy = p[2] - offset * cos(ang2)
+            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
 
         else
             love.graphics.setColor(255,0,0,alpha)
