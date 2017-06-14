@@ -1,4 +1,4 @@
-math.randomseed(os.time())
+--math.randomseed(os.time())
 
 Object = require "libraries/classic"
 
@@ -11,6 +11,7 @@ twindoms = {} --a table to hold all boundary twinhoodds
 function getTwindoms()
     return twindoms
 end
+
 
 local blinkTimer = 0
 local blinkSec = 0.5
@@ -50,7 +51,10 @@ require "classes/guideline"
 --require "classes/Boundary"
 
 
-
+cursor = Cursor()
+function getCursor()
+    return cursor
+end
 
 
 
@@ -95,7 +99,6 @@ function love.load()
     g1.isVisible = true
     g1.drawInfo = true
 
-    cursor = Cursor()
 
 --[[
     --PRE SPLIT
@@ -151,7 +154,7 @@ function love.draw()
         v:draw()
     end
     con:draw()
-    --cursor:draw()
+    cursor:draw()
     g1:draw()
 
     if showTwindoms then
@@ -181,7 +184,7 @@ end
 
 function love.update(dt)
 
-    --cursor:update(objectTree)
+    cursor:update()
 
     --Auto move guideline point in circular motion
     --[[
@@ -234,9 +237,9 @@ keyEvents.spaceDebugToggle = function()
     s.debug = not(s.debug)
 
     if s.debug then
-        con:add("space debug on")
+        --con:add("space debug on")
     else
-        con:add("space debug off")
+        --con:add("space debug off")
     end
 
 end
@@ -325,7 +328,7 @@ keyEvents.setSpaceSelectionMode = function()
         return
     end
     selectionMode = "space"
-    con:add("Selection mode: SPACE")
+    --con:add("Selection mode: SPACE")
 
     --[[
     --deselect all boundaries
@@ -341,7 +344,7 @@ keyEvents.setBoundarySelectionMode = function()
         return
     end
     selectionMode = "boundary"
-    con:add("Selection mode: BOUNDARY")
+    --con:add("Selection mode: BOUNDARY")
     --if no boundary is selected, select first boundary of space
     local s = getSelectedSpace()
     local hasSelected = false
@@ -369,7 +372,7 @@ keyEvents.selectNextSpace = function()
             break
         end
     end
-    con:add("SelectNextSpace")
+    --con:add("SelectNextSpace")
 end
 keyEvents.selectPreviousSpace = function()
     for i, v in ipairs(objectTree) do
@@ -383,7 +386,7 @@ keyEvents.selectPreviousSpace = function()
             break
         end
     end
-    con:add("SelectPreviousSpace")
+    --con:add("SelectPreviousSpace")
 end
 
 
@@ -403,7 +406,7 @@ keyEvents.selectNextBoundary = function()
             break
         end
     end
-    con:add("SelectNextBoundary")
+    --con:add("SelectNextBoundary")
 end
 keyEvents.selectPreviousBoundary = function()
     local selectedSpace = getSelectedSpace()
@@ -418,7 +421,7 @@ keyEvents.selectPreviousBoundary = function()
             break
         end
     end
-    con:add("SelectPreviousBoundary")
+    --con:add("SelectPreviousBoundary")
 end
 keyEvents.selectNext = function()
     if selectionMode == "boundary" then

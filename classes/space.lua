@@ -83,12 +83,9 @@ function Space:new(name, bpgon, boundaries)
     self.boundaries = {} --a table to hold outer boundary objects
     self.spaces = {} --a table to hold child spaces
     self.showInfo = true
+    self.showPoints = true
     self.isSelected = false
     self.debug = false
-
-    --self.twinBoundaries = {} --table to hold shared boundaries
-    --self.outerBoundaries = {} --table to hold outer boundaries
-
 
     --insert space into main object tree for GUI functions
     table.insert(getObjectTree(), self)
@@ -104,67 +101,13 @@ function Space:new(name, bpgon, boundaries)
         for i, v in pairs(boundaries) do
             v.parent = self
         end
-        --[[
-        --recreate shared boundaries table
-        for i, v in pairs(boundaries) do
-            if v.hasTwin then
-                table.insert(self.twinBoundaries, v.twin)
-            end
-        end
-        --]]
     end
 
-    --[[
-    --set default shared and outer
-    for i, b in pairs(self.boundaries) do
-        self:setOuter(i)
-    end
-    --]]
 end
 
 function Space:update(bpgon, boundaries)
     self.bpgon = bpgon
     self.boundaries = boundaries
-end
-
-function Space:setAsTwinBoundaries(bi, ssi, sbi)
-    --bi = index of boundary to share in this space
-    --ssi = index of parent space of shared boundary
-    --sbi = index of boundary of the adjacent space to share
-
-    --[[
-    bo = self.boundaries[bi]
-    sbo = getObjectTree()[ssi].boundaries[sbi]
-
-    if not sbo then
-        con:add("no sbo, when trying setAsTwinBoundaries with sbi #"..sbi)
-        local firstindex = 0
-        for i = 1, 100 do
-            sbo = getObjectTree()[ssi].boundaries[i]
-            if sbo then
-                firstindex = i
-                break
-            end
-        end
-        con:add("first good index in ssi: #"..firstindex)
-        return
-    end
-    bo:setAsTwins(sbo)
-
-    table.insert(self.twinBoundaries, self.boundaries[bi].twin)
-    con:add("Shared my boundary #"..bi.." with space #"..ssi.."'s boundary #"..sbi)
-    --]]
-    
-end
-
-
-function Space:setOuter(bi)
-    --[[
-    --set outer
-    local outerRef = {}
-    table.insert(self.outerBoundaries, bi)
-    con:add("Set my boundary #"..bi.." outer.")
-    --]]
 end
 
 
@@ -226,6 +169,15 @@ function Space:draw()
         love.graphics.print(text, unpack(self:center()))
     end
 
+    --draw polygon points
+    if self.showPoints and self.isSelected then
+        for i = 1, #self.bpgon, 2 do
+            px = self.bpgon[i]
+            py = self.bpgon[i+1]
+            newPoint = Point(px, py, {0,0,255,255})
+            newPoint:draw()
+        end
+    end
     --draw children
     for i, v in pairs(self.spaces) do
         v:draw()
@@ -263,7 +215,9 @@ function Space:chooseSplitBoundary()
                 end
             end
             if isListedAt > 0 then
-                ar.rating = ar.rating + 1
+                --ar.rating = ar.rating + 1
+                --don't rate this. parallel lines get too much
+                --rating value. just collect angles.
             else
                 --a new angle
                 ar = {}
@@ -324,7 +278,7 @@ function Space:chooseSplitBoundary()
     local ratedAngles = rateByPrevalence()
     ratedAngles = rateBy90Deg(ratedAngles)
 
-    --get highest results in a separate table
+    --get highest results in a table
     local highestRatedAngles = {}
     --get highest score
     local highScore = 0
@@ -396,7 +350,7 @@ function Space:findGuideHitpoint(sgo, sbo)
         if i == sbo:getMyIndex() then
             --no test for selected boundary ("self")
         else
-            con:add("testing boundary #"..i)
+            --con:add("testing boundary #"..i)
             repeat --faux do loop to use breaks to escape this block
                 --if hit, set hb = i
                 
@@ -434,7 +388,7 @@ function Space:findGuideHitpoint(sgo, sbo)
             if hb > 0 then
                 --guide hits boundary #hb at hpx, hpy
 
-                print("predicting hit on boundary #"..hb)
+                --print("predicting hit on boundary #"..hb)
                 --leave for loop.
                 --the boundaries are in clockwise order so
                 --the right one should be the FIRST one that is
@@ -450,6 +404,10 @@ end
 
 function Space:splitBoundary(boundary, atLen)
     --splits a boundary object
+    --if atLen is a number, splits b at Len atLen
+    --along boundary
+    --if atLen is a table {x,y}, splits b at x,y
+
     if not boundary then
         con:add("malformed splitBoundary call")
         return
@@ -459,17 +417,33 @@ function Space:splitBoundary(boundary, atLen)
         return
     end
 
+    if type(atLen) == "table" then
+        --split at x,y
+    elseif type(atLen) == "number" then
+        --split at length along boundary
+    else
+        con:add("malformed splitBoundary call")
+        return
+    end
+
     local bi = boundary:getMyIndex()
-
-    local newB, nx, ny = boundary:split(atLen)
-    table.insert(self.boundaries, normBIndex(btl, bi+1), newB)
-
+    local newB, nx, ny
+    if type(atLen) == "number" then
+        newB, nx, ny = boundary:split(atLen)
+    elseif type(atLen) == "table" then
+        newB, nx, ny = boundary:splitAtXy(atLen)
+    end
     local btl = #self.boundaries
-    bi = boundary:getMyIndex()
+    --table.insert(self.boundaries, normBIndex(btl, bi+1), newB)
+    table.insert(self.boundaries, bi+1, newB)
+
+    --[[
+    --TODO: this fucks up
     --manage space.bpgon
     table.insert(self.bpgon, normBIndex(btl, bi)*2+1, nx)
     table.insert(self.bpgon, normBIndex(btl, bi)*2+1, ny) --the same index, we push and slide
-
+    --]]
+    --
     return newB
 end
 
@@ -485,7 +459,7 @@ function Space:split(name)
 
     if sb == 0 then
         --no boundaries suitable for splitting
-        con:add("can't split space")
+        con:add("no boundaries suitable for splitting: can't split space")
         return
     end
 
@@ -495,19 +469,19 @@ function Space:split(name)
 
     if sg == 0 then
         --no guides to split along!
-        con:add("can't split space")
+        con:add("no guides to split along: can't split space")
         return
     end
 
-    con:add("selected guide #"..sg.." for split")
-    con:add("guide x:"..sgo.point.x.." guide y:"..sgo.point.y)
+    --con:add("selected guide #"..sg.." for split")
+    --con:add("guide x:"..sgo.point.x.." guide y:"..sgo.point.y)
 
 
     --calculate guide hitpoint with a boundary
     local hb, hbo, hpx, hpy = self:findGuideHitpoint(sgo, sbo)
 
-    con:add("found hitpoint for split at boundary #"..hb)
-    con:add("hitpoint x:"..hpx.." hitpoint y:"..hpy)
+    --con:add("found hitpoint for split at boundary #"..hb)
+    --con:add("hitpoint x:"..hpx.." hitpoint y:"..hpy)
 
     local hitPoint = Point(hpx,hpy)
     if hitPoint:overlaps(sgo.point) then
@@ -534,7 +508,7 @@ function Space:split(name)
 
             --get the neighbouring space side boundary
             nsnSb = t:getTwinWithParent(self, exclude) 
-            t:separate()
+            --t:separate()
 
         elseif t:contains(hbo) then
 
@@ -548,10 +522,22 @@ function Space:split(name)
     local newBHb = nil --hit boundary side
     if nsnSb then
         newBSb = nsnSb.parent:splitBoundary(nsnSb, sbo:len()-sgo.atLen) 
-        local newTwindomSb = Twindom(self.boundaries[1], newBSb) 
     end
     if nsnHb then
-        newBHb = nsnHb.parent:splitBoundary(nsnHb, sgo.atLen) 
+        --TODO: serious bug: the length setting only works if the
+        --sbo and hbo are parallel! Maybe implement a "LenAtPoint" function for
+        --Boundary. then split at nsnHb:lenAtPoint(hitPoint.x, hitPoint.y)
+        --the problem is that one needs to have a tolerance value here.
+        --
+        --A better option would be to test in the splitBoundary function
+        --if the atLen value is a number or a table. If it is a number,
+        --the function works as it used to. If it is a table, the boundary
+        --split is done so that the table {x, y} coords become the middle point.
+        --
+        --...
+        --
+        --Actually, does this work?
+        newBHb = nsnHb.parent:splitBoundary(nsnHb, {hpx,hpy}) --hbo:len()-sgo.atLen) 
     end
 
 
@@ -588,7 +574,9 @@ function Space:split(name)
     --from there, do endpoints of boundaries until at sbo
     local ptI = 1
     local tailBoundaries = {}
+    local _i = 0
     for i, b in bIter(self.boundaries, hb, sb) do
+        _i = _i + 1
         table.insert(s1Bpgon, b.p2.x)
         table.insert(s1Bpgon, b.p2.y)
 
@@ -597,18 +585,16 @@ function Space:split(name)
         s1PointsE[ptI] = Point(b.p2.x, b.p2.y)
         
         --create nth boundary between prev and this
-        tailBoundaries[i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
+        tailBoundaries[_i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
         --this inherits original boundary data
-        b:setData(tailBoundaries[i])
+        b:setData(tailBoundaries[_i])
         --put boundary in reconstruction table
-        table.insert(s1Boundaries, tailBoundaries[i])
+        table.insert(s1Boundaries, tailBoundaries[_i])
 
         --manage twindoms
         for _, t in pairs(twindoms) do
             if t:contains(b) then
-                --[[
-                t:replace(b, tailBoundaries[i])
-                --]]
+                t:replace(b, tailBoundaries[_i])
             end
         end
     end
@@ -647,7 +633,9 @@ function Space:split(name)
     s2PointsE[1] = Point(sgo.point.x, sgo.point.y)
 
 
-    local s2b1 = Boundary(s2PointsS[1],s2PointsE[1], nil) --notice we're setting the parent as nil because the space is not yet created! remember to set these after said move. (this is done in space:new)
+    local s2b1 = Boundary(s2PointsS[1],s2PointsE[1], nil)
+    --notice we're setting the parent as nil because the space is not yet created!
+    --remember to set these after said move. (update->this is done in space:new)
     --all new boundary, no inherited data
 
     --put in boundary construction table 
@@ -658,7 +646,9 @@ function Space:split(name)
     --until hb
     local ptI = 1
     local tailBoundaries2 = {}
+    local _i = 0
     for i, b in bIter(self.boundaries, sb, hb) do
+        _i = _i + 1
         table.insert(s2Bpgon, b.p2.x)
         table.insert(s2Bpgon, b.p2.y)
 
@@ -667,18 +657,16 @@ function Space:split(name)
         s2PointsE[ptI] = Point(b.p2.x, b.p2.y)
 
         --create nth boundary between prev and this
-        tailBoundaries2[i] = Boundary(s2PointsS[ptI],s2PointsE[ptI],nil)
+        tailBoundaries2[_i] = Boundary(s2PointsS[ptI],s2PointsE[ptI],nil)
         --this inherits original boundary data
-        b:setData(tailBoundaries2[i])
+        b:setData(tailBoundaries2[_i])
         --put in boundary reconstruction table
-        table.insert(s2Boundaries, tailBoundaries2[i])
+        table.insert(s2Boundaries, tailBoundaries2[_i])
 
         --manage twindoms
         for _, t in pairs(twindoms) do
             if t:contains(b) then
-                --[[
-                t:replace(b, tailBoundaries2[i])
-                --]]
+                t:replace(b, tailBoundaries2[_i])
             end
         end
 
@@ -697,8 +685,17 @@ function Space:split(name)
 
 
 
-    --bpgons are done
+    --bpgons and new boundaries are baked
     --
+    --separate old twindoms of sbo, hbo
+    for i, t in pairs(twindoms) do
+        if t:contains(sbo) or t:contains(hbo) then
+            con:add("separating hbo/sbo:")
+            con:add("S#"..t.si[1].."/B#"..t.bi[1].."++S#"..t.si[2].."B#"..t.bi[2])
+            t:separate()
+        end
+    end
+
     --update old boundaries
     self:update(s1Bpgon, s1Boundaries)
 
@@ -706,38 +703,37 @@ function Space:split(name)
     local s2 = Space(name, s2Bpgon, s2Boundaries)
 
 
-    --update twindoms
-    for i, t in pairs(twindoms) do
-        t:update()
-    end
-    local newTwindomShared = Twindom(s1b1, s2b1)
-    if newBHb then
-        --[[
-        local newTwindomHb = Twindom(newBHb, s2b3)
-        --]]
-    end
 
+    --create new twindoms
+    local newTwindomShared = Twindom(s1Boundaries[1], s2Boundaries[1])
     --[[
-    --set twin info
-    --new boundary is shared with self, new space
-    local setSBI1=1
-    local setSBI2=1
-    local ssi = #getObjectTree() --the new space index, latest one created
-    self:setAsTwinBoundaries(setSBI1, ssi, setSBI2) 
-
-
-    --set twin information for new split neighbours
-    if newSplitNeighbourSb then
-        --it's the same sharing info
-        local n = newSplitNeighbourSb
-        self:setAsTwinBoundaries(#self.boundaries, n.parent:getMyIndex(), n:getMyIndex())
+    if newBSb then
+        local newTwindomSboO = Twindom(nsnSb, s2b3)
+        local newTwindomSboN = Twindom(newBSb, s1b3)
     end
-
-    if newSplitNeighbourHb then
-        local n = newSplitNeighbourHb
-        s2:setAsTwinBoundaries(2, n.parent:getMyIndex(), n:getMyIndex())
+    if newBHb then
+        local newTwindomHboO = Twindom(nsnHb, tailBoundaries[1])
+        local newTwindomHboN = Twindom(newBHb, tailBoundaries2[1])
     end
     --]]
+
+    --update twindoms
+    for i, t in pairs(twindoms) do
+        --[[
+        con:add("updating a twin pair:")
+        con:add("bo1 = "..(tostring(t.bo[1]) or "nil"))
+        con:add("bo2 = "..(tostring(t.bo[2]) or "nil"))
+        con:add("bo1.parent = "..(tostring(t.bo[1].parent) or "nil"))
+        con:add("bo2.parent = "..(tostring(t.bo[2].parent) or "nil"))
+        con:add("bi1 = "..(t.bi[1] or "nil"))
+        con:add("bi2 = "..(t.bi[2] or "nil"))
+        con:add("bo1# = "..(t.bo[1]:getMyIndex() or "nil"))
+        con:add("bo2# = "..(t.bo[2]:getMyIndex() or "nil"))
+        --]]
+        local dbt = "t:update, s#"..(t.si[1] or "nil").."b#"..(t.bi[1] or "nil")
+        dbt = dbt.."++s#"..(t.si[2] or "nil").."b#"..(t.bi[2] or "nil")
+        t:update(dbt)
+    end
 
     --[[
     --debug space boundary data
@@ -763,17 +759,6 @@ function Space:getMyIndex()
     end
 end
 
-function Space:getMyTwins()
-    --[[
-    --updates twinBoundaries info
-    self.twinBoundaries = {}
-    for i, b in pairs(self.boundaries) do
-        if b.hasTwin then
-            table.insert(self.twinBoundaries, b.twin)
-        end
-    end
-    --]]
-end
 
 function Space:area()
     --return the area for the space object

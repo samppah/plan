@@ -30,105 +30,14 @@ function Boundary:new(point1, point2, parentSpace)
     self.guides.inverse, --from boundary point 2 (last one(s?) over)
     self.guides.nback, --from boundary point 1, backwards (always over)
     self.guides.iback = self:calcGuides() --from bp2, backwards (always over)
+    self.hasTwin = false --only for info display
 
     self.guides.sortedForSplit = self:sortGuidesForSplit()
 
     self.parent = parentSpace
 
-    --shared boundary info
-    --boundary can be either: shared or outer
-    --
-    --[[
-    self.isOuter = true --default
-    self.hasTwin = false --default
-    --]]
-
-    --[[
-    self.twin = {}
-    self.twin.bo = self
-    self.twin.bi = nil -- my index (boundary index in my parent space)
-    self.twin.sbo = nil --shared boundary object
-    self.twin.sbi = nil --shared boundary index
-    self.twin.sso = nil --shared space object
-    self.twin.ssi = nil --shared space index
-    --]]
 end
 
-function Boundary:validateTwin(boundary)
-    --a twin boundary has same endpoints but in reverse order
-    --[[
-    local sp1x = self.p1.x
-    local sp1y = self.p1.y
-    local ep1x = self.p2.x
-    local ep1y = self.p2.y
-
-    local sp2x = self.p2.x
-    local sp2y = self.p2.y
-    local ep2x = self.p2.x
-    local ep2y = self.p2.y
-
-    local sp = math.abs(sp1x - ep2x) < EPS and math.abs(sp1y - ep2y) < EPS
-    local ep = math.abs(ep1x - sp2x) < EPS and math.abs(ep1y - sp2y) < EPS
-
-    return (sp and ep)
-    --]]
-end
-
-function Boundary:isMyTwin(boundary)
-    --[[
-    --returns true if boundary is a twin of self
-    local validated = self:validateTwin(boundary)
-    if validated then
-        if self.twin.bo == boundary then
-            return true
-        else
-            return false
-        end
-    else
-        return false
-    end
-    --]]
-end
-
-function Boundary:setAsTwins(boundary)
-    --[[
-    --sets "boundary" as a shared ("twin") boundary
-    --only alters data
-    --as to self
-
-    --set my data
-    self.hasTwin = true
-    self.isOuter = false
-
-    self.twin.bo = self
-    self.twin.bi = self:getMyIndex()
-    self.twin.sbo = boundary
-    self.twin.sbi = boundary:getMyIndex()
-    self.twin.sso = boundary.parent
-    self.twin.ssi = boundary.parent:getMyIndex()
-
-    --set twin data
-    boundary.hasTwin = true
-    boundary.isOuter = false
-
-    boundary.twin.bo = boundary
-    boundary.twin.bi = self.twin.sbo:getMyIndex()
-    boundary.twin.sbo = self
-    boundary.twin.sbi = self.twin.bo:getMyIndex()
-    boundary.twin.sso = self.parent
-    boundary.twin.ssi = self.parent:getMyIndex()
-    --]]
-end
-
-function Boundary:createTwin()
-    --[[
-    --returns a new twin boundary for self
-    --this boundary does NOT have a parent space!
-    local twin = Boundary(self.p2.x, self.p2.y, self.p1.x, self.p1.y)
-    self:setAsTwins(twin)
-    return twin
-    --]]
-end
 
 function Boundary:getData(mode)
     --returns a table for passable boundary data
@@ -182,8 +91,11 @@ function Boundary:setData(boundary)
 end
 
 
-function Boundary:getMyIndex()
+function Boundary:getMyIndex(debug)
     for i, b in ipairs(self.parent.boundaries) do
+        if b == nil then
+            con:add("nil in self.parent.boundaries! at index #"..i)
+        end
         if b == self then
             return i
         end
@@ -191,6 +103,7 @@ function Boundary:getMyIndex()
     --if not returned, my parent info is
     --malformed
     con:add("returned a nil from boundary:getmyindex()")
+    if debug then con:add(debug) end
 end
 
 
@@ -214,6 +127,18 @@ function Boundary:draw()
         --draw info
         --local infotxt = "#" .. index .. " " .. self:len() .. " " .. self:angle()
         local index = self:getMyIndex()
+        
+        local function hastwin()
+            local has = false
+            for i, t in pairs(getTwindoms()) do
+                if t:contains(self) then
+                    has = true
+                    break
+                end
+            end
+            return has
+        end
+        self.hasTwin = hastwin()
         local infotxt = "#" .. index .. " " .. self:angle() .. "\n" .. "hasTwin = " .. (self.hasTwin and "true" or "false")
         
         local lenratio = .8
@@ -331,6 +256,37 @@ function Boundary:split(len)
     self:setData(newBoundary)
     return newBoundary, {newPoint1.x, newPoint1.y}
 end
+
+
+function Boundary:splitAtXy(coords)
+    --splits boundary in two at x,y
+    --returns the new Boundary object and split point in {1=x, 2=y} format
+
+    local x = coords[1]
+    local y = coords[2]
+
+    local newPoint1
+    local newPoint2
+
+    local xm = x
+    local ym = y
+    local xe = self.p2.x
+    local ye = self.p2.y
+
+    self.p2.x = xm
+    self.p2.y = ym
+
+    newPoint1 = Point(xm, ym)
+    newPoint2 = Point(xe, ye)
+
+    local newBoundary = Boundary(newPoint1, newPoint2, self.parent)
+    --simply pass data to new boundary
+    self:setData(newBoundary)
+
+    return newBoundary, x, y
+end
+
+
 
 function Boundary:overlaps(boundary)
     if math.abs(self.p1.x - boundary.p1.x) < EPS and math.abs(self.p1.y - boundary.p1.y) < EPS then
