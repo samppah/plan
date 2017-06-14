@@ -44,7 +44,6 @@ function Twindom:update(debug)
     else
         dbt = debug.." -> "
     end
-    dbt = "blablablalbalbal"
 
     --test if separated
     if not (self.bo[1]:overlaps(self.bo[2])) then
@@ -63,6 +62,7 @@ function Twindom:update(debug)
     self.so = {self.bo[1].parent, self.bo[2].parent}
     self.si = {self.so[1]:getMyIndex(), self.so[2]:getMyIndex()}
 end
+
 
 function Twindom:replace(old, new)
 
@@ -151,6 +151,15 @@ function Twindom:getTwinWithParent(space, exclusion)
     end
 end
 
+function Twindom:isSelected()
+    local b1 = self.bo[1]
+    local b2 = self.bo[2]
+
+    local s1 = self.so[1]
+    local s2 = self.so[2]
+    return (selectionMode == "space" and (s1.isSelected or s2.isSelected)) or (selectionMode == "boundary" and (s1.isSelected and b1.isSelected) or (s2.isSelected and b2.isSelected))
+end
+
 function Twindom:draw()
 
     --draw twin linesymbols
@@ -166,56 +175,23 @@ function Twindom:draw()
 
     local alpha = 255
 
-    local isSelected = (selectionMode == "space" and (s1.isSelected or s2.isSelected)) or (selectionMode == "boundary" and (s1.isSelected and b1.isSelected) or (s2.isSelected and b2.isSelected))
-    if isSelected then
+    drawTwinSymbols = true
+
+    if self:isSelected() then
         if getBlinkStat() then
             alpha = 255
             love.graphics.setColor(255,0,0)
-            drawTwinLines = true
         end
     else
         alpha = 128
-        drawTwinLines = true
     end
 
-    if drawTwinLines then
+    if drawTwinSymbols then
         if self.isWonky then
-            local sin = math.sin
-            local cos = math.cos
-
-            local offset = 10
-            local ang2 = b1:angle()-math.pi*2 --angle of share line
-
             love.graphics.setColor(255,0,0,alpha)
-            local p = b1:pointAtLen(b1:len()/2-offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
-            local p = b1:pointAtLen(b1:len()/2+offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
-            local offset = 5 
+            love.graphics.circle("line", b1:center()[1], b1:center()[2], 10)
             love.graphics.setColor(0,255,0,alpha)
-            local p = b1:pointAtLen(b1:len()/2-offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
-            local p = b1:pointAtLen(b1:len()/2+offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
+            love.graphics.circle("line", b2:center()[1], b2:center()[2], 5)
 
         else
             love.graphics.setColor(255,0,0,alpha)

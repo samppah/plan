@@ -558,7 +558,33 @@ keyEvents.showMappings = function()
 end
 
 
+keyEvents.showTwindomInfo = function()
+    con:add("number of twindoms: #"..#twindoms)
+    local ns = 0
+    for i, t in pairs(twindoms)do
+        if t:isSelected() then
+            ns = ns + 1
+        end  
+    end
+    con:add("number of selected: #"..ns)
+    for i, t in pairs(twindoms)do
+        for ii, tt in pairs(twindoms)do
+            if t == tt then
+                --
+            else
+                if math.abs(t.center[1]-tt.center[1])<EPS and math.abs(t.center[2]-tt.center[2]<EPS) then
+                    con:add("twindom overlap")
+                end
+            end
+        end
+    end
+end
 
+keyEvents.updateTwindoms = function()
+    for i, t in pairs(twindoms)do
+        t:update()
+    end
+end
 
 --map keys to ui functions
 keys = {}
@@ -595,6 +621,8 @@ addKeyMapping("escape", keyEvents.quit, "quit")
 addKeyMapping(",", keyEvents.showMappings, "showMappings")
 addKeyMapping("t", keyEvents.toggleShowTwindoms, "toggleShowTwindoms")
 addKeyMapping("u", keyEvents.unselectAllBoundaries, "unselectAllBoundaries")
+addKeyMapping("y", keyEvents.showTwindomInfo, "showTwindomInfo")
+addKeyMapping("w", keyEvents.updateTwindoms, "updateTwindoms")
 
 local repeatingKeys = {
     "h","l","j","k"

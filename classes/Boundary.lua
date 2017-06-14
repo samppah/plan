@@ -292,7 +292,7 @@ function Boundary:overlaps(boundary)
     if math.abs(self.p1.x - boundary.p1.x) < EPS and math.abs(self.p1.y - boundary.p1.y) < EPS then
         return true
     elseif
-        math.abs(self.p2.x - boundary.p1.x) < EPS and math.abs(self.p2.y - boundary.p2.y) < EPS then
+        math.abs(self.p2.x - boundary.p1.x) < EPS and math.abs(self.p2.y - boundary.p1.y) < EPS then
         return true
     else
         return false
