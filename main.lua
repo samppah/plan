@@ -1,4 +1,4 @@
---math.randomseed(os.time())
+math.randomseed(os.time())
 
 Object = require "libraries/classic"
 
@@ -100,7 +100,6 @@ function love.load()
     g1.drawInfo = true
 
 
---[[
     --PRE SPLIT
     --split the master space into desiredRooms nr of spaces
     local safety = 1000
@@ -124,7 +123,6 @@ function love.load()
     con:add("PreSplitting done, after "..1000-safety.."tries")
 
 
---]]
 
     --[[
     --try passing data

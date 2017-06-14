@@ -524,19 +524,6 @@ function Space:split(name)
         newBSb = nsnSb.parent:splitBoundary(nsnSb, sbo:len()-sgo.atLen) 
     end
     if nsnHb then
-        --TODO: serious bug: the length setting only works if the
-        --sbo and hbo are parallel! Maybe implement a "LenAtPoint" function for
-        --Boundary. then split at nsnHb:lenAtPoint(hitPoint.x, hitPoint.y)
-        --the problem is that one needs to have a tolerance value here.
-        --
-        --A better option would be to test in the splitBoundary function
-        --if the atLen value is a number or a table. If it is a number,
-        --the function works as it used to. If it is a table, the boundary
-        --split is done so that the table {x, y} coords become the middle point.
-        --
-        --...
-        --
-        --Actually, does this work?
         newBHb = nsnHb.parent:splitBoundary(nsnHb, {hpx,hpy}) --hbo:len()-sgo.atLen) 
     end
 
@@ -718,33 +705,11 @@ function Space:split(name)
 
     --update twindoms
     for i, t in pairs(twindoms) do
-        --[[
-        con:add("updating a twin pair:")
-        con:add("bo1 = "..(tostring(t.bo[1]) or "nil"))
-        con:add("bo2 = "..(tostring(t.bo[2]) or "nil"))
-        con:add("bo1.parent = "..(tostring(t.bo[1].parent) or "nil"))
-        con:add("bo2.parent = "..(tostring(t.bo[2].parent) or "nil"))
-        con:add("bi1 = "..(t.bi[1] or "nil"))
-        con:add("bi2 = "..(t.bi[2] or "nil"))
-        con:add("bo1# = "..(t.bo[1]:getMyIndex() or "nil"))
-        con:add("bo2# = "..(t.bo[2]:getMyIndex() or "nil"))
-        --]]
         local dbt = "t:update, s#"..(t.si[1] or "nil").."b#"..(t.bi[1] or "nil")
         dbt = dbt.."++s#"..(t.si[2] or "nil").."b#"..(t.bi[2] or "nil")
         t:update(dbt)
     end
 
-    --[[
-    --debug space boundary data
-    for i,b in ipairs(self.boundaries) do
-        print("boundary #"..i)
-        print("  isOuter: "..(b.isOuter and "true" or "-"))
-        print("  hasTwin: "..(b.hasTwin and "true" or "-"))
-        print("  twin.bi: "..(b.twin.bi or "-"))
-        print("  twin.ssi: "..(b.twin.ssi or "-"))
-        print("  twin.sbi: "..(b.twin.sbi or "-"))
-    end
-    --]]
         
     con:add("Space was split")
 
@@ -834,9 +799,5 @@ function Space:getBoundaryAngles()
     for i, v in pairs(self.boundaries) do
         table.insert(angles, v:angle())
     end
-    --[[
-    angles[1]=10
-    angles[2]=20
-    --]]
     return angles
 end

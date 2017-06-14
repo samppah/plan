@@ -4,19 +4,7 @@ local twindoms = getTwindoms()
 
 
 function Twindom:new(boundary1, boundary2)
-    --[[
-    self.bo1 = boundary1
-    self.bi1 = boundary1:getMyIndex()
 
-    self.bo2 = boundary2
-    self.bi2 = boundary2:getMyIndex()
-
-    self.so1 = boundary1.parent
-    self.si1 = boundary1.parent:getMyIndex()
-
-    self.so2 = boundary2.parent
-    self.si2 = boundary2.parent:getMyIndex()
-    --]]
     self.bo = {boundary1, boundary2}
     self.bi = {boundary1:getMyIndex("Twindom:new, b1"), boundary2:getMyIndex("Twindom:new, b2")}
 
@@ -77,9 +65,6 @@ function Twindom:replace(old, new)
         con:add("can't replace old in twindom. old is not contained")
         return
 
-        --maybe a way to test if new boundary is a part of
-        --one of the spaces, specifically of the same, where
-        --the old is contained in
     elseif oldRef == 1 then
         if new.parent ~= old.parent then
             con:add("can't replace old in twindom. new has a different parent")
@@ -162,7 +147,7 @@ end
 
 function Twindom:draw()
 
-    --draw twin linesymbols
+    --draw twin symbols
     --make them blink RED when space is selected,
     --show faded red otherwise
     local drawTwinLines = false

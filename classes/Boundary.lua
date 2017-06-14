@@ -9,12 +9,6 @@ local twindoms = getTwindoms() --get ref to twindoms
 
 function Boundary:new(point1, point2, parentSpace)
 --function Boundary:new(x1,y1,x2,y2)
---[[
-    self.x1 = x1 or 0
-    self.y1 = y1 or 0
-    self.x2 = x2 or 0
-    self.y2 = y2 or 0
-    --]]
     self.p1 = point1
     self.p2 = point2
     self.type = "wall" --further types ex. border?
@@ -56,15 +50,6 @@ function Boundary:getData(mode)
     local data = {}
     table.insert(passableKeys, "type")
     table.insert(passableKeys, "features")
-    --table.insert(passableKeys, "showInfo")
-    --table.insert(passableKeys, "showPoints")
-    --table.insert(passableKeys, "showDir")
-    --table.insert(passableKeys, "isSelected")
-    --table.insert(passableKeys, "guideMode")
-    --table.insert(passableKeys, "guides")
-    --table.insert(passableKeys, "isOuter")
-    --table.insert(passableKeys, "hasTwin")
-    --table.insert(passableKeys, "twin")
     table.insert(passableKeys, "parent")
     for i, v in pairs(passableKeys) do
         data[v] = self[v]
