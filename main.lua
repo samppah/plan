@@ -459,22 +459,25 @@ end
 
 
 
+--[[
 keyEvents.splitBoundary = function()
     local selectedSpace = getSelectedSpace()
     for i, v in ipairs(selectedSpace.boundaries) do
         if v.isSelected then
-            selectedSpace:splitBoundary(i)
+            selectedSpace:splitBoundary(v)
             break
         end
     end
 end
+--]]
+
 keyEvents.splitSpace = function()
     local selectedSpace = getSelectedSpace()
     selectedSpace:split()
 end
 keyEvents.split = function()
     if selectionMode == "boundary" then
-        keyEvents.splitBoundary()
+        keyEvents.splitSpace()
     else
         keyEvents.splitSpace()
     end
