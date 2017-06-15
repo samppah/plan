@@ -158,7 +158,12 @@ function Space:draw()
             alpha = 32
         end
         love.graphics.setColor(255, 255, 0, alpha)
-        love.graphics.polygon("fill", unpack(self.bpgon))
+        --concave polys must be drawn as triangles
+        -- --> draw all space polygons as triangles
+        local tris = love.math.triangulate(self.bpgon)
+        for i, t in pairs(tris) do
+            love.graphics.polygon("fill", unpack(t))
+        end
     end
 
     --draw info
