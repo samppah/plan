@@ -373,7 +373,7 @@ function Space:findGuideHitpoint(sgo, sbo)
 
                 
                 --find point of intersect (hpx, hpy)
-                hpx, hpy = pmath:findIntersect(
+                hpx, hpy = pmath.findIntersect(
                     glx1,gly1,glx2,gly2,
                     tlx1,tly1,tlx2,tly2,
                     true, true,
@@ -788,7 +788,7 @@ function Space:center()
     local midPoints = {}
     for i = 1, #verts/2 do
         oi = i + math.ceil(#verts/2)
-        midPoints[i] = pmath:lineCenter(verts[i].x,verts[i].y,verts[oi].x,verts[oi].y)
+        midPoints[i] = pmath.lineCenter(verts[i].x,verts[i].y,verts[oi].x,verts[oi].y)
     end
     local mpx = 0
     local mpy = 0

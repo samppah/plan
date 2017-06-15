@@ -181,11 +181,11 @@ end
 
 function Boundary:center()
     --return Boundary centerpoint, table format {x,y}
-    return pmath:lineCenter(self.p1.x, self.p1.y, self.p2.x, self.p2.y)
+    return pmath.lineCenter(self.p1.x, self.p1.y, self.p2.x, self.p2.y)
 end
 
 function Boundary:pointAtLen(len)
-    return pmath:pointAtLen(len, self.p1.x, self.p1.y, self.p2.x, self.p2.y)
+    return pmath.pointAtLen(len, self.p1.x, self.p1.y, self.p2.x, self.p2.y)
 end
 
 function Boundary:angle()
