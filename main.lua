@@ -33,7 +33,7 @@ end
 selectionMode = "space" --/"boundary"
 showTwindoms = true
 globalGrid = 30 --for guide setting
-EPS = 0.00001
+EPS = 0.0001
 globalDecimals = 3 --for all results round STRINGS to this number of decimals
 
 minDoorWidth = 90
@@ -97,12 +97,13 @@ function love.load()
 
     --draw a guide
     g1 = Guide(400,200, -2*math.pi) --true: drawInfo
-    g1.isVisible = true
+    g1.isVisible = false--true
     g1.drawInfo = true
 
 
+
+
     --PRE SPLIT
-    --[[
     --split the master space into desiredRooms nr of spaces
     local safety = 1000
     local roomNr = 2
@@ -123,20 +124,9 @@ function love.load()
         end
     end
     con:add("PreSplitting done, after "..1000-safety.."tries")
-    --]]
 
 
 
-    --[[
-    --try passing data
-    for i,b in ipairs(s1.boundaries) do
-        if i == 2 then
-            --nothing
-        else
-            s1.boundaries[2]:setData(s1.boundaries[i])
-        end
-    end
-    --]]
 end
 
 
@@ -589,7 +579,7 @@ end
 
 keyEvents.restart = function()
     objectTree = {}
-    twindoms = {}
+    --twindoms = {}
     love.load()
 end
 

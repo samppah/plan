@@ -341,6 +341,11 @@ function Space:findGuideHitpoint(sgo, sbo)
     --sbo = the boundary from which the guide ray is cast
     --avoid intersection with this!
 
+
+    --TODO: something gets by and returns false, "reason of false" to
+    --space:split.
+    --
+
     local hb = 0 --"hitBoundary", the index of boundary receiving a guideline hit in split
     local hbo = nil -- hitBoundary object
     local hpx = 0 --the hit point
@@ -483,6 +488,11 @@ function Space:split(name)
     --con:add("found hitpoint for split at boundary #"..hb)
     --con:add("hitpoint x:"..hpx.." hitpoint y:"..hpy)
 
+    if type(hpx) == "boolean" then
+        --findIntersect has bugged
+        con:add("findIntersect bugged with: '"..hpy.."', won't split.")
+        return
+    end
     local hitPoint = Point(hpx,hpy)
     if hitPoint:overlaps(sgo.point) then
         --this is weird
@@ -695,11 +705,9 @@ function Space:split(name)
     local newTwindomShared = Twindom(s1Boundaries[1], s2Boundaries[1])
 
     if newBSb then
-        --local newTwindomSboO = Twindom(nsnSb, tailBoundaries2[1])
         local newTwindomSboN = Twindom(newBSb, s1b3)
     end
     if newBHb then
-        --local newTwindomHboO = Twindom(nsnHb, tailBoundaries[1])
         local newTwindomHboN = Twindom(newBHb, s2b3)
     end
 
