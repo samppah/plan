@@ -36,6 +36,7 @@ globalGrid = 30 --for guide setting
 EPS = 0.00001
 globalDecimals = 3 --for all results round STRINGS to this number of decimals
 
+minDoorWidth = 90
 
 desiredRooms = {
     "OH",
@@ -101,6 +102,7 @@ function love.load()
 
 
     --PRE SPLIT
+    --[[
     --split the master space into desiredRooms nr of spaces
     local safety = 1000
     local roomNr = 2
@@ -121,6 +123,7 @@ function love.load()
         end
     end
     con:add("PreSplitting done, after "..1000-safety.."tries")
+    --]]
 
 
 
@@ -570,8 +573,8 @@ keyEvents.showTwindomInfo = function()
             if t == tt then
                 --
             else
-                if math.abs(t.center[1]-tt.center[1])<EPS and math.abs(t.center[2]-tt.center[2]<EPS) then
-                    con:add("twindom overlap")
+                if math.abs(t.center[1]-tt.center[1])<EPS and math.abs(t.center[2]-tt.center[2])<EPS then
+                    con:add("twindom overlap (1/2)")
                 end
             end
         end
@@ -582,6 +585,12 @@ keyEvents.updateTwindoms = function()
     for i, t in pairs(twindoms)do
         t:update()
     end
+end
+
+keyEvents.restart = function()
+    objectTree = {}
+    twindoms = {}
+    love.load()
 end
 
 --map keys to ui functions
@@ -621,6 +630,7 @@ addKeyMapping("t", keyEvents.toggleShowTwindoms, "toggleShowTwindoms")
 addKeyMapping("u", keyEvents.unselectAllBoundaries, "unselectAllBoundaries")
 addKeyMapping("y", keyEvents.showTwindomInfo, "showTwindomInfo")
 addKeyMapping("w", keyEvents.updateTwindoms, "updateTwindoms")
+addKeyMapping("r", keyEvents.restart, "restart")
 
 local repeatingKeys = {
     "h","l","j","k"

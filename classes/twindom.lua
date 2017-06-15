@@ -21,6 +21,11 @@ function Twindom:new(boundary1, boundary2)
 
     self.center = boundary1:center()
 
+    self.len = self.bo[1]:len()
+
+    self.canFitDoor = self.len >= minDoorWidth
+
+
     table.insert(twindoms, self)
 
 end
@@ -45,6 +50,10 @@ function Twindom:update(debug)
 
     --update geometry info
     self.center = self.bo[1]:center()
+    self.len = self.bo[1]:len()
+
+    self.canFitDoor = self.len >= minDoorWidth
+
     --update index info
     self.bi = {self.bo[1]:getMyIndex(dbt.."Twindom:update, b1"), self.bo[2]:getMyIndex(dbt.."Twindom:update, b2")}
     self.so = {self.bo[1].parent, self.bo[2].parent}
@@ -224,6 +233,7 @@ function Twindom:draw()
     if self.isHovered then
         local text = "twin1 = S#"..self.si[1].."B#"..self.bi[1]
         text = text .. "\ntwin2 = S#"..self.si[2].."B#"..self.bi[2]
+        text = text .. "\ncanFitDoor = " .. (self.canFitDoor and "true" or "false")
         love.graphics.setColor(255,255,255,255)
         love.graphics.print(text, 0,0)--self.center[1], self.center[2])
     end

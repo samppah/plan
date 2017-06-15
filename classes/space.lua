@@ -695,11 +695,11 @@ function Space:split(name)
     local newTwindomShared = Twindom(s1Boundaries[1], s2Boundaries[1])
 
     if newBSb then
-        local newTwindomSboO = Twindom(nsnSb, tailBoundaries2[1])
+        --local newTwindomSboO = Twindom(nsnSb, tailBoundaries2[1])
         local newTwindomSboN = Twindom(newBSb, s1b3)
     end
     if newBHb then
-        local newTwindomHboO = Twindom(nsnHb, tailBoundaries[1])
+        --local newTwindomHboO = Twindom(nsnHb, tailBoundaries[1])
         local newTwindomHboN = Twindom(newBHb, s2b3)
     end
 
