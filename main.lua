@@ -59,9 +59,37 @@ end
 
 
 
+spaceCases = {}
+--basic "box"
+table.insert(spaceCases,
+        { 100,100,
+        500,100,
+        400,400,
+        100,400
+            }
+        )
+
+--basic "triangle"
+table.insert(spaceCases,
+        { 100,100,
+        500,100,
+        400,400,
+            }
+        )
 
 
-
+--concave
+table.insert(spaceCases,
+        { 100,100,
+        500,100,
+        500,150,
+        200,150,
+        200,280,
+        500,280,
+        400,400,
+        100,400
+            }
+        )
 
 
 
@@ -69,12 +97,10 @@ function love.load()
 
     love.keyboard.setKeyRepeat = true
 
-    s1 = Space( desiredRooms[1], {
-                100,100,
-                500,100,
-                400,400,
-                100,400
-            })
+    local sc = math.ceil(math.random(3))
+    local scbpgon = spaceCases[sc]
+
+    s1 = Space( desiredRooms[1], scbpgon)
             --[[
     s2 = Space( "living", {
                 300,50,
@@ -103,6 +129,7 @@ function love.load()
 
 
 
+    --[[
     --PRE SPLIT
     --split the master space into desiredRooms nr of spaces
     local safety = 1000
@@ -124,6 +151,7 @@ function love.load()
         end
     end
     con:add("PreSplitting done, after "..1000-safety.."tries")
+    --]]
 
 
 
@@ -579,7 +607,12 @@ end
 
 keyEvents.restart = function()
     objectTree = {}
-    --twindoms = {}
+    local safety = 1000
+    while #twindoms > 0 and safety > 0 do
+        safety = safety - 1
+        t = twindoms[1]
+        t:separate()
+    end
     love.load()
 end
 

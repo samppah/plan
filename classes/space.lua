@@ -320,9 +320,9 @@ function Space:chooseSplitGuide(sbo)
     --returns a guide (index) and the guide object
     --select a guide along sb to split along
     local sgtl = #sbo.guides.sortedForSplit
-    print("sgtl: "..sgtl)
+    --print("sgtl: "..sgtl)
     local sg = math.ceil(sgtl/2) --the middle one
-    print("sg: "..sg)
+    --print("sg: "..sg)
 
     local sgo = sbo.guides.sortedForSplit[sg] --the selected guide object
 
