@@ -834,7 +834,6 @@ function Space:join(space)
         end
     end
 
-
     --create last boundary
     local beforelastpoint = Point(s1PointsE[ptI].x, s1PointsE[ptI].y)
     local lastpoint = Point(s1PointsS[1].x, s1PointsS[1].y)
