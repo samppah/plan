@@ -127,6 +127,10 @@ function Twindom:contains(boundary)
     return self.bo[1] == boundary or self.bo[2] == boundary
 end
 
+function Twindom:containsSpace(space)
+    return self.so[1] == space or self.so[2] == space
+end
+
 function Twindom:getTwinWithParent(space, exclusion)
     --exclusion, if set true, returns the boundary
     --whose parent is NOT the space

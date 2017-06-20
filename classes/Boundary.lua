@@ -124,7 +124,7 @@ function Boundary:draw()
             return has
         end
         self.hasTwin = hastwin()
-        local infotxt = "#" .. index .. " " .. self:angle() .. "\n" .. "hasTwin = " .. (self.hasTwin and "true" or "false")
+        local infotxt = "#" .. (index or "nil") .. " " .. self:angle() .. "\n" .. "hasTwin = " .. (self.hasTwin and "true" or "false")
         
         local lenratio = .8
         love.graphics.print(stringFuncs.formatText(infotxt),unpack(self:pointAtLen(self:len()*lenratio)))
@@ -182,6 +182,98 @@ end
 function Boundary:center()
     --return Boundary centerpoint, table format {x,y}
     return pmath.lineCenter(self.p1.x, self.p1.y, self.p2.x, self.p2.y)
+end
+
+function isAdjacentBoundary(btl, b)
+    local i = self:getMyIndex()
+    local bi = b:getMyIndex()
+
+    if i == 1 or bi == 1 then
+        --test for last boundary
+        if i == 1 then
+            if bi == btl then
+                return true, "back"
+            elseif bi == 2 then
+                return true, "fwd"
+            else
+                return false
+            end
+        else
+            --bi = 1
+            if i == btl then
+                return "fwd"
+            elseif i == 2 then
+                return true, "back"
+            else
+                return false
+            end
+        end
+    else
+        --test normally
+        if i - bi == 1 then
+            return true, "fwd"
+        elseif i - bi == -1 then
+            return true, "back"
+        else
+            return false
+        end
+    end
+
+end
+
+function Boundary:join(boundary)
+    --deletes boundary, sets self's
+    --endpoint as boundary's
+    
+
+    --check if parallel and on the same line
+    if true then --placeholder
+        --all good
+    else
+        con:add("cannot join boundaries. not adjacent.")
+        return
+    end
+
+
+    local bi = self:getMyIndex()
+    local jbi = boundary:getMyIndex()
+    local btl = #self.parent.boundaries
+
+
+    local isAB, method = isAdjacentBoundary(btl, boundary)
+    if isAB then
+        if method == "back" then
+            --self p2 is good,
+            --self p1 shall be boundary.p1
+            self.p2.x = boundary.p2.x
+            self.p2.y = boundary.p2.y
+        else
+            --method = "fwd"
+            --self p1 is good,
+            --self p2 shall be boundary.p2
+            self.p1.x = boundary.p1.x
+            self.p1.y = boundary.p1.y
+        end
+        --find and delete boundary from parentSpace.boundaries
+        local remI = 0
+        for i, b in ipairs(self.parent.boundaries) do
+            if b == boundary then
+                remI = i 
+                break
+            end
+        end
+        if remI == 0 then
+            con:add("remI = 0. this is weird.")
+            return
+        end
+        table.remove(self.parent.boundaries, remI)
+    else
+        con:add("cannot join boundaries. not adjacent.")
+        return
+    end
+    --fix bpgon
+    --use boundaries to reconstruct it
+
 end
 
 function Boundary:pointAtLen(len)

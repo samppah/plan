@@ -11,22 +11,6 @@ require "classes/Boundary"
 require "classes/twindom"
 
 
-function normBIndex(btl, bi)
-    --normalize a boundary index
-    --btl = boundary table length
-    --bi = boundary index, possibly out of bounds
-    --
-    if bi < 1 then
-        while bi < 1 do
-            bi = btl + bi
-        end
-    elseif bi > btl then
-        while bi > btl do
-            bi = -btl + bi
-        end
-    end
-    return bi
-end
 
 function bIter(table, start, end_)
     --an iterator function to loop over
@@ -108,8 +92,11 @@ end
 function Space:update(bpgon, boundaries)
     self.bpgon = bpgon
     self.boundaries = boundaries
+    for _, b in pairs(boundaries) do
+        b.parent = self
+    end
+    con:add("space was updated")
 end
-
 
 function Space:createBoundaries()
     --creates new boundaries for the space with self.bpgon
@@ -727,6 +714,162 @@ function Space:split(name)
     con:add("Space was split")
 
 end
+
+function Space:join(space)
+    --joins a space with self
+    --the joined space is deleted
+    if not space.bpgon then
+        con:add("malformed Space:join() call: no bpgon")
+        return
+    end
+    --check if there's a twindom
+    local hasTwindom = false
+    local twindom = nil
+    for i, t in pairs(twindoms) do
+        if t:containsSpace(self) and t:containsSpace(space) then
+            hasTwindom = true
+            twindom = t
+            break
+        end
+    end
+    if twindom == nil then
+        con:add("malformed Space:join() call: no twindom")
+        return
+    end
+
+    local jbt = twindom:getTwinWithParent(space)
+    local jbs = twindom:getTwinWithParent(self)
+    local jbti = jbt:getMyIndex()
+    local jbsi = jbs:getMyIndex()
+
+    local twinFirstB = space.boundaries[normBIndex(#space.boundaries, jbti+1)]
+    --local selfFirstB = self.boundaries[normBIndex(#self.boundaries, jbsi+1)]
+
+    local hbo = self.boundaries[normBIndex(#self.boundaries, jbsi-1)] --hbo is a legacy...
+
+    --the space calling join() will survive
+    s1Boundaries = {}
+    s1Bpgon = {}
+    s1PointsS = {}
+    s1PointsE = {}
+    
+    --recreate boundaries, start from jbs, point 1.
+    table.insert(s1Bpgon, jbs.p1.x)
+    table.insert(s1Bpgon, jbs.p1.y)
+    s1PointsS[1] = Point(jbs.p1.x, jbs.p1.y)
+
+    --do the next point for old times sake
+    table.insert(s1Bpgon, twinFirstB.p2.x)
+    table.insert(s1Bpgon, twinFirstB.p2.y)
+    s1PointsE[1] = Point(twinFirstB.p2.x, twinFirstB.p2.y)
+
+
+    --create first boundary between those
+    local s1b1 = Boundary(s1PointsS[1],s1PointsE[1], self)
+    --inherit data
+    twinFirstB:setData(s1b1)
+    --manage twindoms
+    for _, t in pairs(twindoms) do
+        if t:contains(twinFirstB) then
+            t:replace(twinFirstB, s1b1)
+        end
+    end
+    --put in boundary reconstruction table
+    table.insert(s1Boundaries, s1b1)
+
+
+    --from jbs, point 1, loop over space.boundaries
+    --until jbt, point 1 (jbt-1 point 2)
+    local ptI = 1
+    local tailBoundaries = {}
+    local _i = 0
+    for i, b in bIter(space.boundaries, jbti+2, jbti-1) do
+        _i = _i + 1
+        table.insert(s1Bpgon, b.p2.x)
+        table.insert(s1Bpgon, b.p2.y)
+
+        ptI = ptI + 1 --start from pointset 2
+        s1PointsS[ptI] = Point(s1PointsE[ptI-1].x, s1PointsE[ptI-1].y)
+        s1PointsE[ptI] = Point(b.p2.x, b.p2.y)
+        
+        --create nth boundary between prev and this
+        tailBoundaries[_i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
+        --this inherits original boundary data
+        b:setData(tailBoundaries[_i])
+        --put boundary in reconstruction table
+        table.insert(s1Boundaries, tailBoundaries[_i])
+
+        --manage twindoms
+        for _, t in pairs(twindoms) do
+            if t:contains(b) then
+                t:replace(b, tailBoundaries[_i])
+            end
+        end
+    end
+
+
+    --from jbt, point 1 (jbs, point 2) loop over self.boundaries
+    --until jbs-1, point 1 (jbs-2 point 2)
+    for i, b in bIter(self.boundaries, jbsi, jbsi-1) do
+        _i = _i + 1
+        table.insert(s1Bpgon, b.p2.x)
+        table.insert(s1Bpgon, b.p2.y)
+
+        ptI = ptI + 1 
+        s1PointsS[ptI] = Point(s1PointsE[ptI-1].x, s1PointsE[ptI-1].y)
+        s1PointsE[ptI] = Point(b.p2.x, b.p2.y)
+        
+        --create nth boundary between prev and this
+        tailBoundaries[_i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
+        --this inherits original boundary data
+        b:setData(tailBoundaries[_i])
+        --put boundary in reconstruction table
+        table.insert(s1Boundaries, tailBoundaries[_i])
+
+        --manage twindoms
+        for _, t in pairs(twindoms) do
+            if t:contains(b) then
+                t:replace(b, tailBoundaries[_i])
+            end
+        end
+    end
+
+
+    --create last boundary
+    local beforelastpoint = Point(s1PointsE[ptI].x, s1PointsE[ptI].y)
+    local lastpoint = Point(s1PointsS[1].x, s1PointsS[1].y)
+
+    --and create last, closing boundary
+    local s1b3 = Boundary(beforelastpoint, lastpoint,nil)
+    --this inherits the data of hb
+    hbo:setData(s1b3)
+    --put in boundary reconstruction table
+    table.insert(s1Boundaries, s1b3)
+
+
+    --poly is closed, everything is baked
+
+    --remove twindom
+    twindom:separate()
+
+    --remove space from objectTree
+    local remI = 0
+    for i, s in ipairs(objectTree) do
+        if s == space then
+            remI = i
+            break
+        end
+    end
+    table.remove(objectTree, remI)
+
+    --recreate self
+    self:update(s1Bpgon, s1Boundaries)
+    con:add("Spaces were joined")
+
+
+    --voilá
+end
+
 
 function Space:getMyIndex()
     for i, s in ipairs(getObjectTree()) do

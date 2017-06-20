@@ -46,6 +46,25 @@ desiredRooms = {
     "K"
 }
 
+function normBIndex(btl, bi)
+    --normalize a boundary index
+    --btl = boundary table length
+    --bi = boundary index, possibly out of bounds
+    --needed across the project
+    
+    if bi < 1 then
+        while bi < 1 do
+            bi = btl + bi
+        end
+    elseif bi > btl then
+        while bi > btl do
+            bi = -btl + bi
+        end
+    end
+    return bi
+end
+
+
 require "classes/Space"
 require "classes/cursor"
 require "classes/guideline"
@@ -619,6 +638,23 @@ keyEvents.restart = function()
     love.load()
 end
 
+keyEvents.joinSpaces = function()
+    local twindom = nil
+    for i, t in pairs(twindoms) do
+        if t.isHovered then
+            twindom = t
+            break
+        end
+    end
+    if not twindom then
+        con:add("no twindom hovered. cannot join spaces")
+        return
+    end
+    local s1 = twindom.so[1]
+    local s2 = twindom.so[2]
+    s1:join(s2)
+end
+
 --map keys to ui functions
 keys = {}
 
@@ -657,6 +693,8 @@ addKeyMapping("u", keyEvents.unselectAllBoundaries, "unselectAllBoundaries")
 addKeyMapping("y", keyEvents.showTwindomInfo, "showTwindomInfo")
 addKeyMapping("w", keyEvents.updateTwindoms, "updateTwindoms")
 addKeyMapping("r", keyEvents.restart, "restart")
+addKeyMapping("o", keyEvents.joinSpaces, "joinSpaces")
+
 
 local repeatingKeys = {
     "h","l","j","k"

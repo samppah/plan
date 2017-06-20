@@ -14,13 +14,14 @@ function Cursor:update(objects)
 
     self.x = love.mouse.getX()
     self.y = love.mouse.getY()
+    self.text = ""..self.x.."/"..self.y
 
     twindoms = getTwindoms()
 
     --test hovering on objects
     for i, s in pairs(objects) do
         --loop over spaces
-        for i, b in pairs(s) do
+        for i, b in pairs(s.boundaries) do
             --loop over boundaries in a space
             --basic x/y prechecks
             --...
