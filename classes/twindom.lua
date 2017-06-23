@@ -176,6 +176,12 @@ function Twindom:isSelected()
     return (selectionMode == "space" and (s1.isSelected or s2.isSelected)) or (selectionMode == "boundary" and (s1.isSelected and b1.isSelected) or (s2.isSelected and b2.isSelected))
 end
 
+function Twindom:isVirtual()
+    local b1 = self.bo[1]
+    local b2 = self.bo[2]
+    return b1.isVirtual and b2.isVirtual
+end
+
 function Twindom:isAdjacent(twindom)
     --untested
     --[[

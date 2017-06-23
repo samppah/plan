@@ -65,7 +65,7 @@ function Space:new(name, bpgon, boundaries)
     self.parent = nil
     self.bpgon = bpgon --boundary polygon, open
     self.boundaries = {} --a table to hold outer boundary objects
-    self.spaces = {} --a table to hold child spaces
+    self.children = {} --a table to hold child spaces
     self.showInfo = true
     self.showPoints = true
     self.isSelected = false
@@ -171,7 +171,7 @@ function Space:draw()
         end
     end
     --draw children
-    for i, v in pairs(self.spaces) do
+    for i, v in pairs(self.children) do
         v:draw()
     end
 end
@@ -179,7 +179,7 @@ end
 function Space:addChild(name, bpgon)
     spaceObject = Space(name, bpgon) 
     spaceObject.parent = self
-    table.insert(self.spaces, spaceObject)
+    table.insert(self.children, spaceObject)
     return spaceObject
 end
 
@@ -452,6 +452,7 @@ function Space:split(name)
     
     --select a boundary to split
     --sb selected boundary (index), sbo = the boundary object
+
     local sb, sbo = self:chooseSplitBoundary()
 
     if sb == 0 then
@@ -718,11 +719,13 @@ end
 function Space:join(space)
     --joins a selected space with self
     --the joined space is deleted
+
     if not space.bpgon then
         con:add("malformed Space:join() call: no bpgon")
         return
     end
-    --check if there's a twindom
+
+    --check if there's a twindom with space
     local hasTwindom = false
     local twindom = nil
     for i, t in pairs(twindoms) do
@@ -737,6 +740,8 @@ function Space:join(space)
         return
     end
 
+
+
     local jbt = twindom:getTwinWithParent(space)
     local jbs = twindom:getTwinWithParent(self)
     local jbti = jbt:getMyIndex()
@@ -747,12 +752,30 @@ function Space:join(space)
 
     local hbo = self.boundaries[normBIndex(#self.boundaries, jbsi-1)] --hbo is a legacy...
 
-    --the space calling join() will survive
+    --the space calling join() will survive, be recreated
     s1Boundaries = {}
     s1Bpgon = {}
     s1PointsS = {}
     s1PointsE = {}
     
+    --TODO: the non-simple cases
+    -- such as:
+    -- +-------+
+    -- |       |
+    -- |    1  |
+    -- +---+   |
+    -- | 2 |   |
+    -- +---+---+
+
+    -- this could be maybe easier with rectangular sub-spaces
+    -- +-------+
+    -- |       |
+    -- |  1.1  |
+    -- +---+ - |
+    -- | 2 |1.2|
+    -- +---+---+
+
+
     --recreate boundaries, start from jbs, point 1.
     table.insert(s1Bpgon, jbs.p1.x)
     table.insert(s1Bpgon, jbs.p1.y)
@@ -762,7 +785,6 @@ function Space:join(space)
     table.insert(s1Bpgon, twinFirstB.p2.x)
     table.insert(s1Bpgon, twinFirstB.p2.y)
     s1PointsE[1] = Point(twinFirstB.p2.x, twinFirstB.p2.y)
-
 
     --create first boundary between those
     local s1b1 = Boundary(s1PointsS[1],s1PointsE[1], self)
