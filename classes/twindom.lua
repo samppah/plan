@@ -87,7 +87,17 @@ function Twindom:replace(old, new)
                 self.bo[1] = new
                 self.so[1] = new.parent
             else
+                local nx1 = new.p1.x
+                local ny1 = new.p1.y
+                local nx2 = new.p2.x
+                local ny2 = new.p2.y
+                local ox1 = self.bo[2].p1.x
+                local oy1 = self.bo[2].p1.y
+                local ox2 = self.bo[2].p2.x
+                local oy2 = self.bo[2].p2.y
                 con:add("can't replace old in twindom. new doesn't overlap b2")
+                con:add("nx1="..nx1.."/ox1="..ox1.."/nx2="..nx2.."/ox2="..ox2)
+                con:add("ny1="..ny1.."/oy1="..oy1.."/ny2="..ny2.."/oy2="..oy2)
             end
         end
     else
@@ -104,7 +114,18 @@ function Twindom:replace(old, new)
                 self.bo[2] = new
                 self.so[2] = new.parent
             else
-                con:add("can't replace old in twindom. new doesn't overlap b1")
+                local nx1 = new.p1.x
+                local ny1 = new.p1.y
+                local nx2 = new.p2.x
+                local ny2 = new.p2.y
+                local ox1 = self.bo[1].p1.x
+                local oy1 = self.bo[1].p1.y
+                local ox2 = self.bo[1].p2.x
+                local oy2 = self.bo[1].p2.y
+                con:add("can't replace old in twindom. new doesn't overlap b2")
+                con:add("nx1="..nx1.."/ox1="..ox1.."/nx2="..nx2.."/ox2="..ox2)
+                con:add("ny1="..ny1.."/oy1="..oy1.."/ny2="..ny2.."/oy2="..oy2)
+
             end
         end
     end
@@ -235,8 +256,8 @@ function Twindom:draw()
 
     --draw hovering data on cursor
     if self.isHovered then
-        local text = "twin1 = S#"..self.si[1].."B#"..self.bi[1]
-        text = text .. "\ntwin2 = S#"..self.si[2].."B#"..self.bi[2]
+        local text = "twin1 = S#"..(self.si[1] or "nil").."B#"..(self.bi[1] or "nil")
+        text = text .. "\ntwin2 = S#"..(self.si[2] or "nil").."B#"..(self.bi[2] or "nil")
         text = text .. "\ncanFitDoor = " .. (self.canFitDoor and "true" or "false")
         love.graphics.setColor(255,255,255,255)
         love.graphics.print(text, 0,0)--self.center[1], self.center[2])

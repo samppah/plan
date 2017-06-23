@@ -716,7 +716,7 @@ function Space:split(name)
 end
 
 function Space:join(space)
-    --joins a space with self
+    --joins a selected space with self
     --the joined space is deleted
     if not space.bpgon then
         con:add("malformed Space:join() call: no bpgon")
@@ -733,7 +733,7 @@ function Space:join(space)
         end
     end
     if twindom == nil then
-        con:add("malformed Space:join() call: no twindom")
+        con:add("malformed Space:join() call: no applicable twindom")
         return
     end
 
@@ -802,6 +802,7 @@ function Space:join(space)
         --manage twindoms
         for _, t in pairs(twindoms) do
             if t:contains(b) then
+                con:add("replaced b")
                 t:replace(b, tailBoundaries[_i])
             end
         end
@@ -829,6 +830,7 @@ function Space:join(space)
         --manage twindoms
         for _, t in pairs(twindoms) do
             if t:contains(b) then
+                con:add("replaced b")
                 t:replace(b, tailBoundaries[_i])
             end
         end
@@ -839,7 +841,7 @@ function Space:join(space)
     local lastpoint = Point(s1PointsS[1].x, s1PointsS[1].y)
 
     --and create last, closing boundary
-    local s1b3 = Boundary(beforelastpoint, lastpoint,nil)
+    local s1b3 = Boundary(beforelastpoint, lastpoint, self)
     --this inherits the data of hb
     hbo:setData(s1b3)
     --put in boundary reconstruction table
@@ -848,7 +850,7 @@ function Space:join(space)
 
     --poly is closed, everything is baked
 
-    --remove twindom
+    --remove twindom of deleted boundaries
     twindom:separate()
 
     --remove space from objectTree
@@ -866,6 +868,10 @@ function Space:join(space)
     con:add("Spaces were joined")
 
 
+    --update all twindom info
+    for i, t in pairs(twindoms) do
+        t:update()
+    end
     --voilá
 end
 

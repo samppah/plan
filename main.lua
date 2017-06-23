@@ -195,15 +195,14 @@ local function clearPlan()
     --nullify table of spaces
     objectTree = {}
     --nullify table of twindoms
-    twindoms = {}
-    --[[
+    --twindoms = {}
+    
     local safety = 1000
     while #twindoms > 0 and safety > 0 do
         safety = safety - 1
         t = twindoms[1]
         t:separate()
     end
-    --]]
 
     s1 = nil
     g1 = nil
@@ -726,7 +725,18 @@ keyEvents.joinSpaces = function()
     end
     local s1 = twindom.so[1]
     local s2 = twindom.so[2]
+    --check if space is selected
+    local reselect = false
+    if s1.isSelected then
+        --it's all right
+    elseif s2.isSelected then
+        --we need to select s1 after joining
+        reselect = true 
+    end
     s1:join(s2)
+    if reselect then
+        s1.isSelected = true
+    end
 end
 
 keyEvents.startWithBox = function()
