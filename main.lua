@@ -36,6 +36,9 @@ globalGrid = 30 --for guide setting
 EPS = 0.001
 globalDecimals = 3 --for all results round STRINGS to this number of decimals
 
+currentScreen = "start" --/plan
+
+
 minDoorWidth = 90
 
 desiredRooms = {
@@ -71,10 +74,6 @@ require "classes/guideline"
 --require "classes/Boundary"
 
 
-cursor = Cursor()
-function getCursor()
-    return cursor
-end
 
 
 
@@ -111,13 +110,27 @@ table.insert(spaceCases,
         )
 
 
+local prepPlanDone = false
 
-function love.load()
+local g1 = nil
+local s1 = nil
 
-    love.keyboard.setKeyRepeat = true
+local cursor = nil
+function getCursor()
+    return cursor
+end
 
-    local sc = math.ceil(math.random(3))
-    local scbpgon = spaceCases[sc]
+function prepPlan(sc)
+    --create cursor
+    cursor = Cursor()
+
+    --start a random case
+    local scbpgon
+    if sc == "0" then
+        -- a random case
+        sc = math.ceil(math.random(#spaceCases))
+    end
+    scbpgon = spaceCases[sc]
 
     s1 = Space( desiredRooms[1], scbpgon)
             --[[
@@ -173,42 +186,42 @@ function love.load()
     --]]
 
 
+    prepPlanDone = true
 
+end
+
+local function clearPlan()
+
+    --nullify table of spaces
+    objectTree = {}
+    --nullify table of twindoms
+    twindoms = {}
+    --[[
+    local safety = 1000
+    while #twindoms > 0 and safety > 0 do
+        safety = safety - 1
+        t = twindoms[1]
+        t:separate()
+    end
+    --]]
+
+    s1 = nil
+    g1 = nil
+    prepPlanDone = false
+
+    --love.load()
 end
 
 
 
+local updateStart = function(dt)
+    --start screen update function
+end
 
-
-
-
-
-
-
-
-
-function love.draw()
-    for i, v in pairs(objectTree) do
-        v:draw()
-    end
+local drawStart = function()
+    love.graphics.print("1:BOX\n2:TRIANGLE\n3:CONCAVE",0,0)
     con:draw()
-    cursor:draw()
-    g1:draw()
-
-    if showTwindoms then
-        for i, t in pairs(twindoms) do
-            t:draw()
-        end
-    end
-
 end
-
-
-
-
-
-
-
 
 
 local gps = 0 --guide position "multiplier" for auto-moving guide point
@@ -218,10 +231,8 @@ local rotcallback = function ()
     --ui functions relink this function to
     --ones that spin the line
 end
-
-
-function love.update(dt)
-
+local updatePlan = function(dt)
+    --plan screen update function
     cursor:update()
 
     --Auto move guideline point in circular motion
@@ -243,6 +254,76 @@ function love.update(dt)
         blinkTimer = 0
         blinkStat = not blinkStat
     end
+end
+
+local drawPlan = function()
+    --draws plan screen
+    for i, v in pairs(objectTree) do
+        v:draw()
+    end
+    con:draw()
+    cursor:draw()
+    g1:draw()
+
+    if showTwindoms then
+        for i, t in pairs(twindoms) do
+            t:draw()
+        end
+    end
+end
+
+
+
+
+local function goToPlanScreen(sc)
+    --sc = space case
+    clearKeyMappings()
+    mapKeysPlan()
+
+    --update screen pointers
+    currentScreen = "plan"
+    drawScreen = drawPlan
+    updateScreen = updatePlan
+
+    prepPlan(sc) --setup a basic space (and additional startup gizmos)
+end
+
+local function goToStartScreen()
+    clearKeyMappings()
+    mapKeysStart()
+
+    currentScreen = "start"
+    drawScreen = drawStart
+    updateScreen = updateStart
+
+    clearPlan()
+end
+
+function love.load()
+    love.keyboard.setKeyRepeat = true
+
+    --see if start screen is overridden for some reason
+    if drawScreen == drawPlan and updateScreen == updatePlan then
+        prepPlan()
+    end
+
+    goToStartScreen()
+
+end
+
+drawScreen = drawPlan --override
+function love.draw()
+    drawScreen()
+end
+
+
+
+
+
+
+updateScreen = updatePlan
+function love.update(dt)
+    updateScreen(dt)
 end
 
 
@@ -628,14 +709,7 @@ keyEvents.updateTwindoms = function()
 end
 
 keyEvents.restart = function()
-    objectTree = {}
-    local safety = 1000
-    while #twindoms > 0 and safety > 0 do
-        safety = safety - 1
-        t = twindoms[1]
-        t:separate()
-    end
-    love.load()
+    goToStartScreen()
 end
 
 keyEvents.joinSpaces = function()
@@ -655,6 +729,19 @@ keyEvents.joinSpaces = function()
     s1:join(s2)
 end
 
+keyEvents.startWithBox = function()
+    --start
+    goToPlanScreen(1)
+end
+keyEvents.startWithTriangle = function()
+    --start
+    goToPlanScreen(2)
+end
+keyEvents.startWithConcave = function()
+    --start
+    goToPlanScreen(3)
+end
+
 --map keys to ui functions
 keys = {}
 
@@ -668,33 +755,47 @@ function addKeyMapping(key, uiFunction, description)
     keys.mappingInfo[#keys.mappingInfo].description = description
 end
 
+function clearKeyMappings()
+    keys = {}
+    keys.mappingInfo = {}
+    keys.pressed = false --for handling key repeat
+end
 
-addKeyMapping("d", keyEvents.spaceDebugToggle, "spaceDebugToggle")
-addKeyMapping("e", keyEvents.dummy, "dummy")
-addKeyMapping("space", keyEvents.mainConsoleToggle, "mainConsoleToggle")
-addKeyMapping("i", keyEvents.showInfo, "showInfo")
-addKeyMapping("down", keyEvents.setBoundarySelectionMode, "setBoundarySelectionMode")
-addKeyMapping("up", keyEvents.setSpaceSelectionMode, "setSpaceSelectionMode")
-addKeyMapping("right", keyEvents.selectNext, "selectNext")
-addKeyMapping("left", keyEvents.selectPrevious, "selectPrevious")
-addKeyMapping("s", keyEvents.split, "split")
-addKeyMapping("h", keyEvents.moveGuideLeft, "moveGuideLeft")
-addKeyMapping("l", keyEvents.moveGuideRight, "moveGuideRight")
-addKeyMapping("j", keyEvents.moveGuideDown, "moveGuideDown")
-addKeyMapping("k", keyEvents.moveGuideUp, "moveGuideUp")
-addKeyMapping("n", keyEvents.rotateGuideCCWToggle, "rotateGuideCCWToggle")
-addKeyMapping("m", keyEvents.rotateGuideCWToggle, "rotateGuideCWToggle")
-addKeyMapping("g", keyEvents.toggleBoundaryGuideMode, "toggleBoundaryGuideMode")
-addKeyMapping("q", keyEvents.quit, "quit")
-addKeyMapping("escape", keyEvents.quit, "quit")
-addKeyMapping(",", keyEvents.showMappings, "showMappings")
-addKeyMapping("t", keyEvents.toggleShowTwindoms, "toggleShowTwindoms")
-addKeyMapping("u", keyEvents.unselectAllBoundaries, "unselectAllBoundaries")
-addKeyMapping("y", keyEvents.showTwindomInfo, "showTwindomInfo")
-addKeyMapping("w", keyEvents.updateTwindoms, "updateTwindoms")
-addKeyMapping("r", keyEvents.restart, "restart")
-addKeyMapping("o", keyEvents.joinSpaces, "joinSpaces")
+function mapKeysPlan()
+    addKeyMapping("d", keyEvents.spaceDebugToggle, "spaceDebugToggle")
+    addKeyMapping("e", keyEvents.dummy, "dummy")
+    addKeyMapping("space", keyEvents.mainConsoleToggle, "mainConsoleToggle")
+    addKeyMapping("i", keyEvents.showInfo, "showInfo")
+    addKeyMapping("down", keyEvents.setBoundarySelectionMode, "setBoundarySelectionMode")
+    addKeyMapping("up", keyEvents.setSpaceSelectionMode, "setSpaceSelectionMode")
+    addKeyMapping("right", keyEvents.selectNext, "selectNext")
+    addKeyMapping("left", keyEvents.selectPrevious, "selectPrevious")
+    addKeyMapping("s", keyEvents.split, "split")
+    addKeyMapping("h", keyEvents.moveGuideLeft, "moveGuideLeft")
+    addKeyMapping("l", keyEvents.moveGuideRight, "moveGuideRight")
+    addKeyMapping("j", keyEvents.moveGuideDown, "moveGuideDown")
+    addKeyMapping("k", keyEvents.moveGuideUp, "moveGuideUp")
+    addKeyMapping("n", keyEvents.rotateGuideCCWToggle, "rotateGuideCCWToggle")
+    addKeyMapping("m", keyEvents.rotateGuideCWToggle, "rotateGuideCWToggle")
+    addKeyMapping("g", keyEvents.toggleBoundaryGuideMode, "toggleBoundaryGuideMode")
+    addKeyMapping(",", keyEvents.showMappings, "showMappings")
+    addKeyMapping("t", keyEvents.toggleShowTwindoms, "toggleShowTwindoms")
+    addKeyMapping("u", keyEvents.unselectAllBoundaries, "unselectAllBoundaries")
+    addKeyMapping("y", keyEvents.showTwindomInfo, "showTwindomInfo")
+    addKeyMapping("w", keyEvents.updateTwindoms, "updateTwindoms")
+    addKeyMapping("q", keyEvents.restart, "restart")
+    addKeyMapping("escape", keyEvents.restart, "restart")
+    addKeyMapping("o", keyEvents.joinSpaces, "joinSpaces")
+end
 
+function mapKeysStart()
+    addKeyMapping("1", keyEvents.startWithBox, "startWithBox")
+    addKeyMapping("2", keyEvents.startWithTriangle, "startWithTriangle")
+    addKeyMapping("3", keyEvents.startWithConcave, "startWithConcave")
+    addKeyMapping("q", keyEvents.quit, "quit")
+    addKeyMapping("escape", keyEvents.quit, "quit")
+    addKeyMapping(",", keyEvents.showMappings, "showMappings")
+end
 
 local repeatingKeys = {
     "h","l","j","k"
