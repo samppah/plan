@@ -1,10 +1,10 @@
 Point = Object:extend()
 
 Point.points = {}
-local displayRadius = 10
+local displayRadius = 3
 
 function Point:new(x,y, color)
-    self.color = color or {255,0,0,128}
+    self.color = color or {0,255,255,128}
     self.x = x
     self.y = y
     table.insert(Point.points, self)

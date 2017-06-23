@@ -87,8 +87,18 @@ function Boundary:getMyIndex(debug)
     end
     --if not returned, my parent info is
     --malformed
-    con:add("returned a nil from boundary:getmyindex()")
-    if debug then con:add(debug) end
+    local isInOT
+    for i, s in pairs(getObjectTree()) do
+        if self.parent == s then
+            isInOT = true
+            con:add("queried boundary:getMyIndex() for a space in objectTree")
+            break
+        end
+    end
+    if not isInOT then
+        con:add("queried boundary:getMyIndex() for a space NOT in objectTree")
+    end
+    con:add("returned a nil from boundary:getmyindex() /.."..(debug or ""))
 end
 
 
@@ -184,7 +194,7 @@ function Boundary:center()
     return pmath.lineCenter(self.p1.x, self.p1.y, self.p2.x, self.p2.y)
 end
 
-function isAdjacentBoundary(btl, b)
+function Boundary:isAdjacent(btl, b)
     local i = self:getMyIndex()
     local bi = b:getMyIndex()
 
@@ -240,7 +250,7 @@ function Boundary:join(boundary)
     local btl = #self.parent.boundaries
 
 
-    local isAB, method = isAdjacentBoundary(btl, boundary)
+    local isAB, method = self:isAdjacent(btl, boundary)
     if isAB then
         if method == "back" then
             --self p2 is good,

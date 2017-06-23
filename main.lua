@@ -218,6 +218,7 @@ local updateStart = function(dt)
 end
 
 local drawStart = function()
+    love.graphics.setColor(255,255,255,255)
     love.graphics.print("1:BOX\n2:TRIANGLE\n3:CONCAVE",0,0)
     con:draw()
 end

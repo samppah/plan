@@ -44,8 +44,6 @@ function Twindom:update(debug)
         con:add("S#"..self.si[1].."/B#"..self.bi[1].."++S#"..self.si[2].."B#"..self.bi[2])
         self.isWonky = true
         --self:separate()
-    else
-        self.isWonky = false
     end
 
     --update geometry info
@@ -173,10 +171,46 @@ end
 function Twindom:isSelected()
     local b1 = self.bo[1]
     local b2 = self.bo[2]
-
     local s1 = self.so[1]
     local s2 = self.so[2]
     return (selectionMode == "space" and (s1.isSelected or s2.isSelected)) or (selectionMode == "boundary" and (s1.isSelected and b1.isSelected) or (s2.isSelected and b2.isSelected))
+end
+
+function Twindom:isAdjacent(twindom)
+    --untested
+    --[[
+    local b1 = self.bo[1]
+    local b2 = self.bo[2]
+    local s1 = self.so[1]
+    local s2 = self.so[2]
+    local s1btl = #s1.boundaries
+    local s2btl = #s2.boundaries
+
+    local bt1 = twindom.bo[1]
+    local bt2 = twindom.bo[2]
+    local st1 = twindom.so[1]
+    local st2 = twindom.so[2]
+    local st1btl = #s1.boundaries
+    local st2btl = #s2.boundaries
+    
+    local isAdj = false
+
+    if b1:isAdjacent(s1btl, bt1) then
+        isAdj = true
+    end
+    if b1:isAdjacent(s1btl, bt2) then
+        isAdj = true
+    end
+    if b2:isAdjacent(s2btl, bt1) then
+        isAdj = true
+    end
+    if b2:isAdjacent(s2btl, bt2) then
+        isAdj = true
+    end
+
+    return isAdj
+    --]]
+    return false
 end
 
 function Twindom:draw()
@@ -209,43 +243,10 @@ function Twindom:draw()
 
     if drawTwinSymbols then
         if self.isWonky then
-            local sin = math.sin
-            local cos = math.cos
-
-            local offset = 10
-            local ang2 = b1:angle()-math.pi*2 --angle of share line
-
             love.graphics.setColor(255,0,0,alpha)
-            local p = b1:pointAtLen(b1:len()/2-offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
-            local p = b1:pointAtLen(b1:len()/2+offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
-            local offset = 5 
+            love.graphics.circle("line", b1:center()[1], b1:center()[2], 10)
             love.graphics.setColor(0,255,0,alpha)
-            local p = b1:pointAtLen(b1:len()/2-offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
-            local p = b1:pointAtLen(b1:len()/2+offset)
-            local spx = p[1] + offset * sin(ang2)
-            local spy = p[2] + offset * cos(ang2)
-            local epx = p[1] - offset * sin(ang2)
-            local epy = p[2] - offset * cos(ang2)
-            love.graphics.rectangle("line", spx,spy,epx-spx,epy-spy)
-
+            love.graphics.circle("line", b2:center()[1], b2:center()[2], 5)
         else
             love.graphics.setColor(255,0,0,alpha)
             love.graphics.circle("fill", b1:center()[1], b1:center()[2], 10)
@@ -259,8 +260,16 @@ function Twindom:draw()
         local text = "twin1 = S#"..(self.si[1] or "nil").."B#"..(self.bi[1] or "nil")
         text = text .. "\ntwin2 = S#"..(self.si[2] or "nil").."B#"..(self.bi[2] or "nil")
         text = text .. "\ncanFitDoor = " .. (self.canFitDoor and "true" or "false")
+        text = text .. "\nisWonky = " .. (self.isWonky and "true" or "false")
         love.graphics.setColor(255,255,255,255)
         love.graphics.print(text, 0,0)--self.center[1], self.center[2])
+        --draw adjacent twindoms symbols
+        for i, t in pairs(twindoms) do
+            if t:isAdjacent(self) then
+                love.graphics.setColor(255,255,255,255)
+                love.graphics.circle("line", t.center[1], t.center[2], 15)
+            end
+        end
     end
 
 end

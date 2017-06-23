@@ -166,7 +166,7 @@ function Space:draw()
         for i = 1, #self.bpgon, 2 do
             px = self.bpgon[i]
             py = self.bpgon[i+1]
-            newPoint = Point(px, py, {0,0,255,255})
+            newPoint = Point(px, py, {0,255,255,255})
             newPoint:draw()
         end
     end
@@ -796,14 +796,15 @@ function Space:join(space)
         tailBoundaries[_i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
         --this inherits original boundary data
         b:setData(tailBoundaries[_i])
+        b.parent = self
         --put boundary in reconstruction table
         table.insert(s1Boundaries, tailBoundaries[_i])
 
         --manage twindoms
         for _, t in pairs(twindoms) do
-            if t:contains(b) then
-                con:add("replaced b")
+            if t:contains(b) and not (b==jbti) then
                 t:replace(b, tailBoundaries[_i])
+                con:add("replaced b in twindom")
             end
         end
     end
@@ -824,14 +825,15 @@ function Space:join(space)
         tailBoundaries[_i] = Boundary(s1PointsS[ptI], s1PointsE[ptI], self)
         --this inherits original boundary data
         b:setData(tailBoundaries[_i])
+        b.parent = self
         --put boundary in reconstruction table
         table.insert(s1Boundaries, tailBoundaries[_i])
 
         --manage twindoms
         for _, t in pairs(twindoms) do
-            if t:contains(b) then
-                con:add("replaced b")
+            if t:contains(b) and not (b==jbsi) then
                 t:replace(b, tailBoundaries[_i])
+                con:add("replaced b in twindom")
             end
         end
     end
@@ -844,6 +846,7 @@ function Space:join(space)
     local s1b3 = Boundary(beforelastpoint, lastpoint, self)
     --this inherits the data of hb
     hbo:setData(s1b3)
+    s1b3.parent = self
     --put in boundary reconstruction table
     table.insert(s1Boundaries, s1b3)
 
@@ -872,6 +875,28 @@ function Space:join(space)
     for i, t in pairs(twindoms) do
         t:update()
     end
+    for i, t in pairs(twindoms) do
+        local b1 = t.bo[1]
+        local b2 = t.bo[2]
+        local s1 = t.so[1]
+        local s2 = t.so[2]
+
+        local bi1 = t.bi[1]
+        local bi2 = t.bi[2]
+        local si1 = t.si[1]
+        local si2 = t.si[2]
+
+        if (bi1==nil) or (bi2==nil) or (si1==nil) or (si2==nil) then
+            con:add("set IsWonky")
+            con:add("si1:"..(si1 or "nil"))
+            con:add("bi1:"..(bi1 or "nil"))
+            con:add("si2:"..(si2 or "nil"))
+            con:add("bi2:"..(bi2 or "nil"))
+            t.isWonky = true
+        end
+
+    end
+
     --voilá
 end
 
