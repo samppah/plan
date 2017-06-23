@@ -19,6 +19,7 @@ function Boundary:new(point1, point2, parentSpace)
     self.isSelected = false
     self.guideMode = "off" --/"inverse"/"both"/"off"
     self.showTwin = true
+    self.isVirtual = true --for composite space virtual boundaries
     self.guides = {}
     self.guides.normal, --from boundary point 1 (last one(s?) over)
     self.guides.inverse, --from boundary point 2 (last one(s?) over)
@@ -105,18 +106,57 @@ end
 function Boundary:draw()
     local sin = math.sin
     local cos = math.cos
+    local pi = math.pi
 
+    --draw line
     if self.parent.isSelected then
         alpha = 255
     else
         alpha = 64
+    end
+    if self.isVirtual then
+        alpha = alpha /2
     end
     if self.isSelected then
         love.graphics.setColor(255, 0, 255, alpha)
     else
         love.graphics.setColor(255, 255, 255, alpha)
     end
-    love.graphics.line(self.p1.x,self.p1.y,self.p2.x,self.p2.y)
+    if self.isVirtual then
+        --draw dashed line
+        local l = self:len()
+        local dashl = 10
+        local gapl = 15
+        local safety = 1000
+        local x1 = self.p1.x
+        local y1 = self.p1.y
+        local ang = self:angle()
+        while safety > 0 and l > dashl+gapl do
+            safety = safety - 1
+            local x2 = x1 + dashl * sin(ang+pi/2)
+            local y2 = y1 + dashl * cos(ang+pi/2)
+            love.graphics.line(x1,y1,x2,y2)
+            x1 = x1 + (dashl+gapl) * sin(ang+pi/2)
+            y1 = y1 + (dashl+gapl) * cos(ang+pi/2)
+            l = l - (dashl+gapl)
+        end
+        --draw last dash
+        local x2 = 0
+        local y2 = 0
+        if l < dashl  then
+            x2 = self.p2.x
+            y2 = self.p2.y
+        else
+            x2 = x1 + dashl * sin(ang+pi/2)
+            y2 = y1 + dashl * cos(ang+pi/2)
+        end
+        love.graphics.line(x1,y1,x2,y2)
+    else
+        love.graphics.line(self.p1.x,self.p1.y,self.p2.x,self.p2.y)
+    end
+
+
+
 
     if self.showInfo then
         --draw info
@@ -198,6 +238,10 @@ function Boundary:isAdjacent(btl, b)
     local i = self:getMyIndex()
     local bi = b:getMyIndex()
 
+    if b.parent ~= self.parent then
+        return false
+    end
+
     if i == 1 or bi == 1 then
         --test for last boundary
         if i == 1 then
@@ -231,6 +275,9 @@ function Boundary:isAdjacent(btl, b)
 
 end
 
+function Boundary:hasSameAngle(boundary)
+    return math.abs(self:angle() - boundary:angle()) < EPS
+end
 function Boundary:join(boundary)
     --deletes boundary, sets self's
     --endpoint as boundary's

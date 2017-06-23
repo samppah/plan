@@ -33,7 +33,7 @@ end
 selectionMode = "space" --/"boundary"
 showTwindoms = true
 globalGrid = 30 --for guide setting
-EPS = 0.001
+EPS = 0.00001
 globalDecimals = 3 --for all results round STRINGS to this number of decimals
 
 currentScreen = "start" --/plan
